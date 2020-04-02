@@ -11,7 +11,8 @@ import iot.mqtt.MQTTClientFactory;
 import iot.networkentity.Gateway;
 import iot.networkentity.Mote;
 import iot.networkentity.NetworkServer;
-import it.unibo.acdingnet.protelis.ProtelisApp;
+import it.unibo.acdingnet.protelis.application.ProtelisApplication;
+import it.unibo.acdingnet.protelis.application.ProtelisApplicationFactory;
 import org.jetbrains.annotations.NotNull;
 import selfadaptation.adaptationgoals.IntervalAdaptationGoal;
 import selfadaptation.adaptationgoals.ThresholdAdaptationGoal;
@@ -45,7 +46,7 @@ public class SimulationRunner {
     private List<MoteProbe> moteProbe;
     private PollutionGrid pollutionGrid;
 
-    private ProtelisApp protelisApp;
+    private ProtelisApplication protelisApplication;
     private RoutingApplication routingApplication;
     private PollutionMonitor pollutionMonitor;
     private NetworkServer networkServer;
@@ -136,8 +137,8 @@ public class SimulationRunner {
         return pollutionGrid;
     }
 
-    public ProtelisApp getProtelisApp() {
-        return protelisApp;
+    public ProtelisApplication getProtelisApplication() {
+        return protelisApplication;
     }
 
     public void setApproach(String name) {
@@ -184,7 +185,7 @@ public class SimulationRunner {
         this.pollutionGrid = null;
         this.pollutionMonitor = null;
         this.routingApplication = null;
-        protelisApp = createProtelisApp();
+        protelisApplication = createProtelisApplication();
     }
 
     /**
@@ -353,11 +354,11 @@ public class SimulationRunner {
         );
     }
 
-    private ProtelisApp createProtelisApp() {
+    private ProtelisApplication createProtelisApplication() {
         return simulation.getInputProfile()
             .orElseThrow(() -> new IllegalStateException("input profile no selected"))
             .getProtelisProgram()
-            .map(app -> new ProtelisApp(
+            .map(app -> ProtelisApplicationFactory.INSTANCE.createApplication(
                 app,
                 getEnvironment().getMotes(),
                 getEnvironment().getClock())

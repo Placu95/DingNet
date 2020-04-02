@@ -6,7 +6,7 @@
         <simulationDuration>120</simulationDuration>
         <timeUnit>Hours</timeUnit>
         <protelisApp>
-            <protelisProgram>protelis:homeHeating_timer</protelisProgram>
+            <protelisProgram>AirQualityMonitoring</protelisProgram>
         </protelisApp>
         <QoS>
             <adaptationGoal type="interval">
