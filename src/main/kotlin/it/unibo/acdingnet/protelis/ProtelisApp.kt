@@ -17,7 +17,8 @@ import it.unibo.acdingnet.protelis.node.BuildingNode
 import it.unibo.acdingnet.protelis.util.Const
 import it.unibo.acdingnet.protelis.util.gui.ProtelisPollutionGrid
 import it.unibo.acdingnet.protelis.util.toGeoPosition
-import it.unibo.mqttclientwrapper.mock.cast.MqttMockCast
+import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
+import it.unibo.mqttclientwrapper.mock.serialization.MqttMockSer
 import org.jxmapviewer.viewer.GeoPosition
 import org.protelis.lang.ProtelisLoader
 import org.protelis.lang.datatype.impl.StringUID
@@ -74,7 +75,7 @@ class ProtelisApp(
 
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
-            MQTTClientFactory.getSingletonInstance(), Const.NEIGHBORHOOD_RANGE, nodes
+            MqttMockSer(), Const.NEIGHBORHOOD_RANGE, nodes
         )
 
         sensorNodes = motes
@@ -87,8 +88,8 @@ class ProtelisApp(
                     900,
                     id,
                     Const.APPLICATION_ID,
-                    MqttMockCast(),
-                    MQTTClientFactory.getSingletonInstance(),
+                    MqttMockSer(),
+                    addLoRaWANAdapters(MqttMockSer()),
                     LatLongPosition(
                         it.pathPosition.latitude,
                         it.pathPosition.longitude
@@ -106,7 +107,7 @@ class ProtelisApp(
                 900,
                 it.first.uid,
                 Const.APPLICATION_ID,
-                MqttMockCast(),
+                MqttMockSer(),
                 it.first.position,
                 it.second,
                 0.1,
@@ -114,6 +115,14 @@ class ProtelisApp(
                 neigh.getNeighborhoodByNodeId(it.first.uid).map { n -> n.uid }.toSet()
             )
         }
+    }
+
+    private fun addLoRaWANAdapters(mqttClient: MqttClientBasicApi): MqttClientBasicApi {
+        MQTTClientFactory.getDeserializers().
+            forEach { mqttClient.addDeserializer(it.clazz, it.deserializer) }
+        MQTTClientFactory.getSerializers().
+            forEach { mqttClient.addSerializer(it.clazz, it.serializer) }
+        return mqttClient
     }
 
     override fun consumePackets(topicFilter: String, message: TransmissionWrapper) {}

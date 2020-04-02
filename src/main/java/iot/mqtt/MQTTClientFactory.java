@@ -1,8 +1,6 @@
 package iot.mqtt;
 
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializer;
 import io.moquette.broker.Server;
 import iot.lora.BasicFrameHeader;
 import iot.lora.EU868ParameterByDataRate;
@@ -19,9 +17,7 @@ import util.time.DoubleTime;
 import util.time.Time;
 
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * Factory to retrieve an instance of {@link MqttClientBasicApi}
@@ -32,6 +28,49 @@ public class MQTTClientFactory {
     private final static String ADDRESS = SettingsReader.getInstance().getMQTTServerAddress();
     private static MqttClientBasicApi clientBasicApi;
     private static Server server;
+    private static List<Serializer> serializers = new LinkedList<>();
+    private static List<Deserializer> deserializers = new LinkedList<>();
+
+    static {
+        // region serializers
+        serializers.add(new Serializer<>(FrameHeader.class, (header, type, context) -> {
+            var obj = new JsonObject();
+            obj.addProperty("sourceAddress", Base64.getEncoder().encodeToString(header.getSourceAddress()));
+            obj.addProperty("fCtrl", header.getFCtrl());
+            obj.addProperty("fCnt", header.getFCntAsShort());
+            obj.addProperty("fOpts", Base64.getEncoder().encodeToString(header.getFOpts()));
+            return obj;
+        }));
+        serializers.add(new Serializer<>(Time.class, (header, type, context) -> {
+            var obj = new JsonObject();
+            obj.addProperty("time", header.asMilli());
+            return obj;
+        }));
+        // endregion
+        // region deserializer
+        deserializers.add(new Deserializer<>(FrameHeader.class,
+            (jsonElement, type, jsonDeserializationContext) -> new BasicFrameHeader()
+            .setSourceAddress(Base64.getDecoder().decode(((JsonObject) jsonElement).get("sourceAddress").getAsString()))
+            .setFCnt(((JsonObject) jsonElement).get("fCnt").getAsShort())
+            .setFCtrl(((JsonObject) jsonElement).get("fCtrl").getAsByte())
+            .setFOpts(Base64.getDecoder().decode(((JsonObject) jsonElement).get("fOpts").getAsString()))
+        ));
+        deserializers.add(new Deserializer<>(FrameHeaderApp.class, (jsonElement, type, jsonDeserializationContext) ->
+            new FrameHeaderApp(
+                Arrays.asList(Converter.toObjectType(Base64.getDecoder().decode(((JsonObject) jsonElement).get("sourceAddress").getAsString()))),
+                ((JsonObject) jsonElement).get("fCnt").getAsInt(),
+                ((JsonObject) jsonElement).get("fCtrl").getAsInt(),
+                Arrays.asList(Converter.toObjectType(Base64.getDecoder().decode(((JsonObject) jsonElement).get("fOpts").getAsString())))
+            )
+        ));
+        deserializers.add(new Deserializer<>(RegionalParameter.class, (element, type, context) ->
+            EU868ParameterByDataRate.valueOf(element.getAsString())
+        ));
+        deserializers.add(new Deserializer<>(Time.class, (element, type, context) ->
+            new DoubleTime(((JsonObject) element).get("time").getAsDouble())
+        ));
+        // endregion
+    }
 
     /**
      *
@@ -63,37 +102,21 @@ public class MQTTClientFactory {
         return clientBasicApi;
     }
 
+    /**
+     * the types are checked by the classes {@link Serializer} and {@link Deserializer}
+     */
+    @SuppressWarnings("unchecked")
     private static ClientBuilder addAdapters(ClientBuilder builder) {
-        return builder
-            .addSerializer(FrameHeader.class, (JsonSerializer<FrameHeader>) (header, type, context) -> {
-                var obj = new JsonObject();
-                obj.addProperty("sourceAddress", Base64.getEncoder().encodeToString(header.getSourceAddress()));
-                obj.addProperty("fCtrl", header.getFCtrl());
-                obj.addProperty("fCnt", header.getFCntAsShort());
-                obj.addProperty("fOpts", Base64.getEncoder().encodeToString(header.getFOpts()));
-                return obj;
-            })
-            .addDeserializer(FrameHeader.class, (JsonDeserializer<FrameHeader>) (jsonElement, type, jsonDeserializationContext) -> new BasicFrameHeader()
-                .setSourceAddress(Base64.getDecoder().decode(((JsonObject) jsonElement).get("sourceAddress").getAsString()))
-                .setFCnt(((JsonObject) jsonElement).get("fCnt").getAsShort())
-                .setFCtrl(((JsonObject) jsonElement).get("fCtrl").getAsByte())
-                .setFOpts(Base64.getDecoder().decode(((JsonObject) jsonElement).get("fOpts").getAsString())))
-            .addDeserializer(FrameHeaderApp.class, (JsonDeserializer<FrameHeaderApp>) (jsonElement, type, jsonDeserializationContext) ->
-                new FrameHeaderApp(
-                    Arrays.asList(Converter.toObjectType(Base64.getDecoder().decode(((JsonObject) jsonElement).get("sourceAddress").getAsString()))),
-                    ((JsonObject) jsonElement).get("fCnt").getAsInt(),
-                    ((JsonObject) jsonElement).get("fCtrl").getAsInt(),
-                    Arrays.asList(Converter.toObjectType(Base64.getDecoder().decode(((JsonObject) jsonElement).get("fOpts").getAsString())))
-                )
-            )
-            .addDeserializer(RegionalParameter.class,
-                (JsonDeserializer<RegionalParameter>) (element, type, context) -> EU868ParameterByDataRate.valueOf(element.getAsString()))
-            .addSerializer(Time.class, (JsonSerializer<Time>) (header, type, context) -> {
-                var obj = new JsonObject();
-                obj.addProperty("time", header.asMilli());
-                return obj;
-            })
-            .addDeserializer(Time.class,
-                (JsonDeserializer<Time>) (element, type, context) -> new DoubleTime(((JsonObject) element).get("time").getAsDouble()));
+        serializers.forEach(s -> builder.addSerializer(s.getClazz(), s.getSerializer()));
+        deserializers.forEach(d -> builder.addDeserializer(d.getClazz(), d.getDeserializer()));
+        return builder;
+    }
+
+    public static List<Serializer> getSerializers() {
+        return Collections.unmodifiableList(serializers);
+    }
+
+    public static List<Deserializer> getDeserializers() {
+        return Collections.unmodifiableList(deserializers);
     }
 }
