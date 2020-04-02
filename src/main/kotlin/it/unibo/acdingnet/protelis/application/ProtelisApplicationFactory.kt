@@ -9,7 +9,7 @@ object ProtelisApplicationFactory {
         protelisApplication: String,
         motes: List<Mote>,
         timer: GlobalClock
-    ): ProtelisApplication = when(protelisApplication) {
+    ): ProtelisApplication = when (protelisApplication) {
         AirQualityMonitoring::class.java.simpleName -> AirQualityMonitoring(motes, timer)
         else -> throw IllegalArgumentException("Application name is unknown")
     }

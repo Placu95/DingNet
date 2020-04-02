@@ -134,7 +134,7 @@ class AirQualityMonitoring(
             building.map { DefaultWaypoint(it.position.toGeoPosition()) to "" +
                 "${it.getTemp(Const.ProtelisEnv.CURRENT_TEMP)}\u00ba/" +
                 "${it.getTemp(Const.ProtelisEnv.DESIRED_TEMP)}\u00ba/" +
-                "${it.getTemp(Const.ProtelisEnv.MAX_TEMP)}\u00ba"}
+                "${it.getTemp(Const.ProtelisEnv.MAX_TEMP)}\u00ba" }
                 .toMap()
         )
         return listOf(gridPainter, buildingPainter, tempPainter)

@@ -27,5 +27,4 @@ class PhysicalNetwork(val devices: Set<DeviceUID> = emptySet()) {
     }
 
     private fun computeDelay(from: Host): Time = TODO()
-
 }

@@ -9,7 +9,7 @@ data class Host(
     private var devicesNumber: Int = 0
 ) {
 
-    override fun equals(other: Any?): Boolean = when(other) {
+    override fun equals(other: Any?): Boolean = when (other) {
         is Host -> id == other.id
         else -> false
     }
