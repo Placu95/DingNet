@@ -23,9 +23,18 @@ public class Simulator {
 
         Options options = new Options();
 
-        Option inputFile = new Option("i", "inputFile", true, "path of configuration file");
-        inputFile.setRequired(false);
-        options.addOption(inputFile);
+        Option configFile =
+            new Option("cf", "configurationFile", true, "path of the configuration file");
+        configFile.setRequired(false);
+        options.addOption(configFile);
+        Option inputProfileFile =
+            new Option("ipf", "inputProfileFile", true, "path of the input profiles file");
+        inputProfileFile.setRequired(false);
+        options.addOption(inputProfileFile);
+        Option outputFile =
+            new Option("of", "outputFile", true, "path of the output file");
+        outputFile.setRequired(false);
+        options.addOption(outputFile);
 
         CommandLine cmd = null;
 
@@ -43,13 +52,20 @@ public class Simulator {
         // resource directory to the the directory in the user directory
         copyResourceDirectory(settingsReader.getConfigurationsResources(), settingsReader.getConfigurationsDirectory());
 
-        if (cmd.hasOption("inputFile")) {
-            var file = new File(cmd.getOptionValue("inputFile"));
+        if (cmd.hasOption("inputProfileFile")) {
+            simulationRunner.setInputProfiles(cmd.getOptionValue("inputProfileFile"));
+        }
+
+        if (cmd.hasOption("configurationFile")) {
+            var file = new File(cmd.getOptionValue("configurationFile"));
             simulationRunner.loadConfigurationFromFile(file);
             simulationRunner.getSimulation().setInputProfile(simulationRunner.getInputProfiles().get(0));
             simulationRunner.setupTimedRun();
             var sec = new MutableInteger(5);
-            simulationRunner.simulate(sec, new BatchSimulationUpdater(sec));
+            simulationRunner.simulate(
+                sec,
+                new BatchSimulationUpdater(sec, cmd.getOptionValue("outputFile"))
+            );
         } else {
             MainGUI.startGUI(simulationRunner);
         }
@@ -61,10 +77,16 @@ public class Simulator {
     private static class BatchSimulationUpdater implements SimulationUpdateListener {
 
         private final MutableInteger rate;
-        private Time time;
+        private final String outputFile;
+        private final Time time;
 
         public BatchSimulationUpdater(MutableInteger rate) {
+            this(rate, null);
+        }
+
+        public BatchSimulationUpdater(MutableInteger rate, String outputFile) {
             this.rate = rate;
+            this.outputFile = outputFile;
             time = DoubleTime.zero();
         }
 
@@ -75,7 +97,12 @@ public class Simulator {
 
         @Override
         public void onEnd() {
-
+            if (outputFile != null) {
+                SimulationRunner
+                    .getInstance()
+                    .getProtelisApplication()
+                    .storeSimulationResults(outputFile);
+            }
         }
     }
 
