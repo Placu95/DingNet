@@ -4,6 +4,7 @@ import iot.GlobalClock
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.model.SensorType
 import it.unibo.acdingnet.protelis.node.SensorNode
+import it.unibo.acdingnet.protelis.physicalnetwork.Host
 import it.unibo.acdingnet.protelis.util.Const
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
 import org.protelis.lang.datatype.impl.StringUID
@@ -21,9 +22,10 @@ class SensorNodeWrapper(
     position: LatLongPosition,
     sensorTypes: List<SensorType>,
     val timer: GlobalClock,
-    neighborhood: Set<StringUID>
+    neighborhood: Set<StringUID>,
+    host: Host? = null
 ) : SensorNode(protelisProgram, sleepTime, sensorDeviceUID, applicationUID, netManagerMqttClient,
-    execContextMqttClient, position, sensorTypes, neighborhood) {
+    execContextMqttClient, position, sensorTypes, host, neighborhood) {
 
     override fun createContext(): SensorECForDingNet {
         return SensorECForDingNet(this, applicationUID, execContextMqttClient, networkManager)
