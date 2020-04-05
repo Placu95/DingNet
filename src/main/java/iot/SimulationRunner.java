@@ -294,6 +294,14 @@ public class SimulationRunner {
     }
 
     /**
+     * Load input profiles from a provided file.
+     * @param file The file path with the input profiles.
+     */
+    public void setInputProfiles(String file) {
+        inputProfiles = InputProfilesReader.readInputProfiles(file);
+    }
+
+    /**
      * Load a configuration from a provided xml file.
      * @param file The file with the configuration.
      */

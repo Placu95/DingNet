@@ -11,6 +11,8 @@ import selfadaptation.adaptationgoals.ThresholdAdaptationGoal;
 
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.temporal.ChronoUnit;
@@ -19,7 +21,19 @@ import java.util.*;
 public class InputProfilesReader {
 
     public static List<InputProfile> readInputProfiles() {
-        return readInputProfiles(InputProfilesReader.class.getResourceAsStream("/inputProfiles/inputProfile.xml"));
+        return readInputProfiles("/inputProfiles/inputProfile.xml");
+    }
+
+    public static List<InputProfile> readInputProfiles(String file) {
+        var inputStream = InputProfilesReader.class.getResourceAsStream(file);
+        if (inputStream == null) {
+            try {
+                inputStream = new FileInputStream(file);
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
+        return readInputProfiles(inputStream);
     }
 
     public static List<InputProfile> readInputProfiles(InputStream fileStream) {
