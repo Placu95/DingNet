@@ -54,6 +54,13 @@ public abstract class Application {
         return sensorData;
     }
 
+    /**
+     * Store the simulation results to the file represented by the pathFile parameter
+     * @param pathFile file to save the simulation results in
+     */
+    public void storeSimulationResults(String pathFile) {
+
+    }
 
     /**
      * Destructor which can be used to properly destruct applications.
