@@ -1,0 +1,19 @@
+[configurationNetwork]
+gamma = 0.1
+beta = 0.2
+dee = 1
+dcc = 2
+dec = 3
+dsc = 4
+dHostBroker = 5
+
+[brokerHostConfig]
+type = "CLOUD"
+bandwidth = 125
+
+[[hostsConfig]]
+    type = "CLOUD"
+    id = "c000"
+[[hostsConfig]]
+    type = "EDGE"
+    bandwidth = 10

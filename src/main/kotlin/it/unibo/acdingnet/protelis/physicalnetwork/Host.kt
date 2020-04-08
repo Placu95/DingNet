@@ -7,11 +7,13 @@ enum class HostType { CLOUD, EDGE, LEAF }
 data class Host(
     val id: String,
     val type: HostType,
-    val bandWidth: Int,
+    private val bandwidth: Int?,
     var devices: Set<DeviceUID> = emptySet()
 ) {
 
     private val devicesRun: MutableMap<DeviceUID, Int> = mutableMapOf()
+
+    fun getBandwidth(): Int = checkNotNull(bandwidth) { "bandWidth parameter is undefined" }
 
     fun getDevicesRuns() = devicesRun.toMap()
 
