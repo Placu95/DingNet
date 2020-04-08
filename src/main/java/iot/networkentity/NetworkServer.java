@@ -20,12 +20,18 @@ public class NetworkServer {
     // Map moteId -> (Map gatewayId -> lastTransmission)
     private final Map<Long, Map<Long, LoraTransmission>> transmissionReceived;
     private final Map<Long, List<LoraTransmission>> historyMote;
-    private final MqttClientBasicApi mqttClient;
+    private MqttClientBasicApi mqttClientToGateway;
+    private MqttClientBasicApi mqttClientToApp;
     private BinaryOperator<Map.Entry<Long, LoraTransmission>> chooseGatewayStrategy = this::chooseByTransmissionPower;
     private short frameCounter;
 
     public NetworkServer(MqttClientBasicApi mqttClient) {
-        this.mqttClient = mqttClient;
+        this(mqttClient, mqttClient);
+    }
+
+    public NetworkServer(MqttClientBasicApi mqttClientToGateway, MqttClientBasicApi mqttClientToApp) {
+        this.mqttClientToGateway = mqttClientToGateway;
+        this.mqttClientToApp = mqttClientToApp;
         transmissionReceived = new HashMap<>();
         historyMote = new HashMap<>();
         subscribeToGateways();
@@ -50,7 +56,7 @@ public class NetworkServer {
     }
 
     private void subscribeToGateways() {
-        mqttClient.subscribe(this, Topics.getGatewayToNetServer("+", "+", "+"),
+        mqttClientToGateway.subscribe(this, Topics.getGatewayToNetServer("+", "+", "+"),
             TransmissionWrapper.class,
             (topic, msg) -> {
                 var transmission = msg.getTransmission();
@@ -66,14 +72,14 @@ public class NetworkServer {
                 transmissionReceived.get(moteId).put(gatewayId, transmission);
                 //check if packet is duplicated (is not send to app)
                 if (historyMote.get(moteId).stream().noneMatch(t -> t.equals(transmission))) {
-                    mqttClient.publish(Topics.getNetServerToApp(transmission.getContent().getReceiverEUI(), moteId), msg);
+                    mqttClientToApp.publish(Topics.getNetServerToApp(transmission.getContent().getReceiverEUI(), moteId), msg);
                 }
                 historyMote.get(moteId).add(transmission);
             });
     }
 
     private void subscribeToApps() {
-        mqttClient.subscribe(this, Topics.getAppToNetServer("+", "+"),
+        mqttClientToApp.subscribe(this, Topics.getAppToNetServer("+", "+"),
             BasicMqttMessage.class,
             (topic, msg) -> {
                 //get mote id
@@ -89,7 +95,7 @@ public class NetworkServer {
                     //send to best gateway
                     var packet = new LoraWanPacket(gatewayId, moteId, msg.getDataAsArray(),
                         new BasicFrameHeader().setFCnt(incrementFrameCounter()), msg.getMacCommands());
-                    mqttClient.publish(Topics.getNetServerToGateway(Topics.getApp(topic), gatewayId, moteId),
+                    mqttClientToGateway.publish(Topics.getNetServerToGateway(Topics.getApp(topic), gatewayId, moteId),
                         new LoraWanPacketWrapper(packet));
                 }
             });
@@ -106,10 +112,24 @@ public class NetworkServer {
     }
 
     public void reconnect() {
-        this.mqttClient.disconnect();
-        this.mqttClient.connect();
+        this.mqttClientToGateway.disconnect();
+        this.mqttClientToGateway.connect();
+        this.mqttClientToApp.disconnect();
+        this.mqttClientToApp.connect();
 
         subscribeToGateways();
         subscribeToApps();
+    }
+
+    public void setMqttClientToApp(MqttClientBasicApi mqttClientToApp) {
+        this.mqttClientToApp.disconnect();
+        this.mqttClientToApp = mqttClientToApp;
+        subscribeToApps();
+    }
+
+    public void setMqttClientToGateway(MqttClientBasicApi mqttClientToGateway) {
+        this.mqttClientToGateway.disconnect();
+        this.mqttClientToGateway = mqttClientToGateway;
+        subscribeToGateways();
     }
 }
