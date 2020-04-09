@@ -11,6 +11,7 @@ object ProtelisApplicationFactory {
         timer: GlobalClock
     ): ProtelisApplication = when (protelisApplication) {
         AirQualityMonitoring::class.java.simpleName -> AirQualityMonitoring(motes, timer)
+        Acsos::class.java.simpleName -> Acsos(motes, timer)
         else -> throw IllegalArgumentException("Application name is unknown")
     }
 }
