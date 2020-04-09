@@ -37,7 +37,7 @@ abstract class GenericNode(
         _, old, new -> if (old != new) networkManager.changePosition(new)
     }
 
-    private var host: Host? = host
+    var host: Host? = host
         set(value) {
             checkNotNull(value) { "You cannot assign a null host to a node" }
             field?.removeDevice(deviceUID)
