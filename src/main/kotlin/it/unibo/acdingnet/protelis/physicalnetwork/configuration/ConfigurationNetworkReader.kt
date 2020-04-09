@@ -14,8 +14,8 @@ data class ConfigurationNetwork(
     val dHostBroker: Double
 ) {
     init {
-        check (gamma in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
-        check (beta in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
+        check(gamma in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
+        check(beta in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
     }
 
     companion object : ConfigSpec("") {
@@ -28,7 +28,7 @@ data class BrokerHostConfig(
     val bandwidth: Double,
     val id: String? = null
 ) {
-    companion object: ConfigSpec("") {
+    companion object : ConfigSpec("") {
         val brokerHostConfig by required<BrokerHostConfig>()
     }
 }
@@ -38,7 +38,7 @@ data class HostConfig(
     val bandwidth: Double? = null,
     val id: String? = null
 ) {
-    companion object: ConfigSpec("") {
+    companion object : ConfigSpec("") {
         val hostsConfig by required<List<HostConfig>>()
     }
 }

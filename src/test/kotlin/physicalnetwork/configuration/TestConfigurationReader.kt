@@ -9,7 +9,7 @@ import it.unibo.acdingnet.protelis.physicalnetwork.configuration.ConfigurationNe
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.HostConfig
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
 
-class TestConfigurationReader: StringSpec() {
+class TestConfigurationReader : StringSpec() {
 
     private val configFilePath = "/physicalnetwork/testFile.toml"
     private val configurationReader = Reader(configFilePath)
