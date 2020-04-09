@@ -2,18 +2,18 @@ package it.unibo.acdingnet.protelis.physicalnetwork
 
 import org.protelis.lang.datatype.DeviceUID
 
-enum class HostType { CLOUD, EDGE, LEAF }
+enum class HostType { CLOUD, EDGE, SMARTPHONE }
 
 data class Host(
     val id: String,
     val type: HostType,
-    private val bandwidth: Int?,
+    private val bandwidth: Double? = null,
     var devices: Set<DeviceUID> = emptySet()
 ) {
 
     private val devicesRun: MutableMap<DeviceUID, Int> = mutableMapOf()
 
-    fun getBandwidth(): Int = checkNotNull(bandwidth) { "bandWidth parameter is undefined" }
+    fun getBandwidth(): Double = checkNotNull(bandwidth) { "bandWidth parameter is undefined" }
 
     fun getDevicesRuns() = devicesRun.toMap()
 
