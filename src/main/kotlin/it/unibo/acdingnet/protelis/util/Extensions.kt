@@ -24,3 +24,8 @@ fun LatLongPosition.travel(destination: LatLongPosition, distance: Double): LatL
 
 fun Tuple.toLatLongPosition() =
     LatLongPosition(this[0] as Double, this[1] as Double)
+
+fun <E> Collection<E>.skip(n: Int): Collection<E> {
+    var count = 0
+    return this.partition { count++ < n }.second
+}
