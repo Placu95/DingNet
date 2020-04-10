@@ -33,12 +33,9 @@ class Acsos(
     private val random = Random(2)
     private val loraNodes: List<SensorNodeWrapper>
     private val otherNodes: List<GenericNode>
-    private val physicalNetwork: PhysicalNetwork
+    private val physicalNetwork: PhysicalNetwork = PhysicalNetwork(Reader(""), timer)
 
     init {
-        // creates physical network
-        physicalNetwork = PhysicalNetwork(Reader(""))
-
         // creates node for neighborhood manager and neighborhood manager
         val nodes: MutableSet<Node> = motes.map {
             Node(
