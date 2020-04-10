@@ -58,6 +58,7 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         val time = computeArrivalTime(getHostByDevice(deviceUID), hostBroker,
             receivingQueueFreeFrom, messageLenght)
         receivingQueueFreeFrom = time
+        NetworkStatistic.addDelay(deviceUID, time - clock.time, NetworkStatistic.Type.UPLOAD)
         return time
     }
 
@@ -65,6 +66,7 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         val time = computeArrivalTime(hostBroker, getHostByDevice(deviceUID),
             sendingQueueFreeFrom, messageLenght)
         sendingQueueFreeFrom = time
+        NetworkStatistic.addDelay(deviceUID, time - clock.time, NetworkStatistic.Type.DOWNLOAD)
         return time
     }
 
@@ -100,5 +102,17 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
                 else -> throw IllegalStateException()
             }
         }
+    }
+}
+
+object NetworkStatistic {
+
+    enum class Type { UPLOAD, DOWNLOAD }
+
+    var delays: Map<DeviceUID, List<Pair<Type, Time>>> = emptyMap()
+    private set
+
+    fun addDelay(deviceUID: DeviceUID, delay: Time, type: Type) {
+        delays += deviceUID to (delays.getOrDefault(deviceUID, emptyList()) + Pair(type, delay))
     }
 }
