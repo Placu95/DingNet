@@ -22,6 +22,7 @@ class PhysicalNetwork(reader: Reader) {
         hosts = reader.hostsConfig.mapIndexed { i, it ->
             Host(it.id ?: "${it.type}_$i", it.type, it.bandwidth)
         }.toSet()
+            .plus(hostBroker)
     }
 
     fun addNodes(edgeNodes: Collection<GenericNode>, nodes: Collection<GenericNode>) {
@@ -51,10 +52,10 @@ class PhysicalNetwork(reader: Reader) {
 
     private fun hostByType(hostType: HostType) = checkNotNull(hosts.find { it.type == hostType })
 
-    fun delayToPublish(deviceUID: DeviceUID): Time =
+    fun delayToPublish(deviceUID: DeviceUID, messageLenght: Int): Time =
         computeDelay(getHostByDevice(deviceUID), hostBroker)
 
-    fun delayToReceive(deviceUID: DeviceUID): Time =
+    fun delayToReceive(deviceUID: DeviceUID, messageLenght: Int): Time =
         computeDelay(hostBroker, getHostByDevice(deviceUID))
 
     private fun getHostByDevice(deviceUID: DeviceUID) =

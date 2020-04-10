@@ -1,6 +1,7 @@
 package it.unibo.acdingnet.protelis.mqtt
 
 import iot.GlobalClock
+import iot.mqtt.TransmissionWrapper
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.mqttclientwrapper.mock.serialization.MqttMockSer
 import org.protelis.lang.datatype.DeviceUID
@@ -12,7 +13,7 @@ class MqttMockSerWithDelay(
 ) : MqttMockSer() {
 
     override fun publish(topic: String, message: Any) {
-        val delay = physicalNetwork.delayToPublish(deviceUID)
+        val delay = physicalNetwork.delayToPublish(deviceUID, computeLength(message))
         clock.addTriggerOneShot(
             clock.time.plusMillis(delay.asMilli())) {
             super.publish(topic, message)
@@ -26,11 +27,19 @@ class MqttMockSerWithDelay(
         messageConsumer: (topic: String, message: T) -> Unit
     ) {
         super.subscribe(subscriber, topicFilter, classMessage) { topic, message ->
-            val delay = physicalNetwork.delayToReceive(deviceUID)
+            val delay = physicalNetwork.delayToReceive(deviceUID, computeLength(message))
             clock.addTriggerOneShot(
                 clock.time.plusMillis(delay.asMilli())) {
                 messageConsumer.invoke(topic, message)
             }
         }
     }
+
+    private fun <E> computeLength(message: E) = gson.toJson(
+        when(message) {
+            is LoRaTransmissionWrapper -> message.transmission.content
+            is TransmissionWrapper -> message.transmission.content
+            else -> message
+        }
+    ).length
 }
