@@ -14,8 +14,7 @@ class MqttMockSerWithDelay(
 
     override fun publish(topic: String, message: Any) {
         val delay = physicalNetwork.delayToPublish(deviceUID, computeLength(message))
-        clock.addTriggerOneShot(
-            clock.time.plusMillis(delay.asMilli())) {
+        clock.addTriggerOneShot(clock.time + delay) {
             super.publish(topic, message)
         }
     }
@@ -28,15 +27,14 @@ class MqttMockSerWithDelay(
     ) {
         super.subscribe(subscriber, topicFilter, classMessage) { topic, message ->
             val delay = physicalNetwork.delayToReceive(deviceUID, computeLength(message))
-            clock.addTriggerOneShot(
-                clock.time.plusMillis(delay.asMilli())) {
+            clock.addTriggerOneShot(clock.time + delay) {
                 messageConsumer.invoke(topic, message)
             }
         }
     }
 
     private fun <E> computeLength(message: E) = gson.toJson(
-        when(message) {
+        when (message) {
             is LoRaTransmissionWrapper -> message.transmission.content
             is TransmissionWrapper -> message.transmission.content
             else -> message
