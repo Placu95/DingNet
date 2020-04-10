@@ -3,23 +3,39 @@ package it.unibo.acdingnet.protelis.physicalnetwork.configuration
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
+import util.time.DoubleTime
+import util.time.Time
+import util.time.TimeUnit
 
 data class ConfigurationNetwork(
     val gamma: Double,
     val beta: Double,
-    val dee: Double,
-    val dcc: Double,
-    val dec: Double,
-    val dsc: Double,
-    val dHostBroker: Double
+    val dee: Time,
+    val dcc: Time,
+    val dec: Time,
+    val dsc: Time,
+    val dHostBroker: Time
 ) {
     init {
         check(gamma in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
         check(beta in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
     }
 
-    companion object : ConfigSpec("") {
-        val configurationNetwork by required<ConfigurationNetwork>()
+    companion object : ConfigSpec("configurationNetwork") {
+        private val gamma by required<Double>()
+        private val beta by required<Double>()
+        private val dee by required<Double>()
+        private val dcc by required<Double>()
+        private val dec by required<Double>()
+        private val dsc by required<Double>()
+        private val dHostBroker by required<Double>()
+
+        fun read(config: Config) = ConfigurationNetwork(
+            config[gamma], config[beta], toTime(config[dee]), toTime(config[dcc]),
+            toTime(config[dec]), toTime(config[dsc]), toTime(config[dHostBroker])
+        )
+
+        private fun toTime(t: Double) = DoubleTime(t, TimeUnit.MILLIS)
     }
 }
 
@@ -56,7 +72,7 @@ class Reader(path: String) {
             addSpec(HostConfig)
         }.from().toml.inputStream(Reader::class.java.getResourceAsStream(path))
 
-        configurationNetwork = config[ConfigurationNetwork.configurationNetwork]
+        configurationNetwork = ConfigurationNetwork.read(config)
         brokerHostConfig = config[BrokerHostConfig.brokerHostConfig]
         hostsConfig = config[HostConfig.hostsConfig]
     }

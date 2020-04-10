@@ -8,6 +8,8 @@ import it.unibo.acdingnet.protelis.physicalnetwork.configuration.BrokerHostConfi
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.ConfigurationNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.HostConfig
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
+import util.time.DoubleTime
+import util.time.TimeUnit
 
 class TestConfigurationReader : StringSpec() {
 
@@ -16,7 +18,8 @@ class TestConfigurationReader : StringSpec() {
 
     init {
         "test reading of the free variables" {
-            val configurationNetwork = ConfigurationNetwork(0.1, 0.2, 1.0, 2.0, 3.0, 4.0, 5.0)
+            val configurationNetwork = ConfigurationNetwork(0.1, 0.2, toTime(1.0),
+                toTime(2.0), toTime(3.0), toTime(4.0), toTime(5.0))
             configurationReader.configurationNetwork shouldBe configurationNetwork
         }
 
@@ -35,4 +38,6 @@ class TestConfigurationReader : StringSpec() {
             configurationReader.hostsConfig shouldContainAll hosts
         }
     }
+
+    fun toTime(t: Double) = DoubleTime(t, TimeUnit.MILLIS)
 }
