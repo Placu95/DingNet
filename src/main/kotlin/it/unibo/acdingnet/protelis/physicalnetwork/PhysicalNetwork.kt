@@ -8,7 +8,7 @@ import org.protelis.lang.datatype.DeviceUID
 import util.time.DoubleTime
 import util.time.Time
 
-class PhysicalNetwork(reader: Reader, val clock: GlobalClock) {
+class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
 
     private val hostBroker: Host
     private var receivingQueueFreeFrom: Time = DoubleTime.zero()
@@ -54,18 +54,26 @@ class PhysicalNetwork(reader: Reader, val clock: GlobalClock) {
 
     private fun hostByType(hostType: HostType) = checkNotNull(hosts.find { it.type == hostType })
 
-    fun arrivalTimeToBroker(deviceUID: DeviceUID, messageLenght: Int): Time =
-        computeArrivalTime(getHostByDevice(deviceUID), hostBroker, receivingQueueFreeFrom, messageLenght)
+    fun arrivalTimeToBroker(deviceUID: DeviceUID, messageLenght: Int): Time {
+        val time = computeArrivalTime(getHostByDevice(deviceUID), hostBroker,
+            receivingQueueFreeFrom, messageLenght)
+        receivingQueueFreeFrom = time
+        return time
+    }
 
-    fun arrivalTimeToSubscriber(deviceUID: DeviceUID, messageLenght: Int): Time =
-        computeArrivalTime(hostBroker, getHostByDevice(deviceUID), sendingQueueFreeFrom, messageLenght)
+    fun arrivalTimeToSubscriber(deviceUID: DeviceUID, messageLenght: Int): Time {
+        val time = computeArrivalTime(hostBroker, getHostByDevice(deviceUID),
+            sendingQueueFreeFrom, messageLenght)
+        sendingQueueFreeFrom = time
+        return time
+    }
 
     private fun getHostByDevice(deviceUID: DeviceUID) =
         checkNotNull(hosts.find { it.devices.contains(deviceUID) })
 
-    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLenght: Int): Time {
+    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLength: Int): Time {
         return maxTime(queueTime, clock.time)
-            .plusMillis(messageLenght / hostBroker.getBandwidth()) // they are millis???
+            .plusMillis(messageLength / hostBroker.getBandwidth()) // they are millis???
             .plus(computeRTTBetweenHosts(h1, h2))
     }
 
