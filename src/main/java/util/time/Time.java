@@ -18,6 +18,8 @@ public interface Time {
 
     int getDay();
 
+    Time plus(Time time);
+
     Time plusNanos(double nanoSeconds);
 
     Time plusMillis(double milliSeconds);
@@ -27,6 +29,12 @@ public interface Time {
     Time plusMinutes(double minutes);
 
     Time plusHours(double hours);
+
+    default Time minus(Time time) {
+        return minus(time, true);
+    }
+
+    Time minus(Time time, boolean onlyPositive);
 
     boolean isAfter(Time other);
 

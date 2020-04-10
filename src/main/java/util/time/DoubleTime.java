@@ -74,6 +74,11 @@ public class DoubleTime implements Time {
         return (int)asHour() % 24;
     }
 
+    @Override
+    public Time plus(Time time) {
+        return plus(time.asMilli(), TimeUnit.MILLIS);
+    }
+
     private DoubleTime plus(double value, TimeUnit timeUnit) {
         return new DoubleTime(time + timeUnit.convertTo(value, this.timeUnit), this.timeUnit);
     }
@@ -101,6 +106,15 @@ public class DoubleTime implements Time {
     @Override
     public Time plusHours(double hours) {
         return plus(hours, TimeUnit.HOURS);
+    }
+
+    @Override
+    public Time minus(Time time, boolean onlyPositive) {
+        var value = this.time - TimeUnit.MILLIS.convertTo(time.asMilli(), this.timeUnit);
+        if (value < 0 && onlyPositive) {
+            throw new IllegalStateException("after the subtraction the time is negative");
+        }
+        return new DoubleTime(value, this.timeUnit);
     }
 
     @Override
