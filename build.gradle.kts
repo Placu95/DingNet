@@ -35,6 +35,7 @@ dependencies {
     implementation(Libs.protelis)
     implementation(Libs.simplelatlng)
     implementation(Libs.commons_lang3)
+    implementation(Libs.jpx)
     // dependencies for test
     testImplementation(Libs.junit_jupiter)
     testImplementation(Libs.kotlintest_runner_junit5)
