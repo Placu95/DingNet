@@ -54,16 +54,16 @@ class PhysicalNetwork(reader: Reader, val clock: GlobalClock) {
 
     private fun hostByType(hostType: HostType) = checkNotNull(hosts.find { it.type == hostType })
 
-    fun delayToPublish(deviceUID: DeviceUID, messageLenght: Int): Time =
-        computeDelay(getHostByDevice(deviceUID), hostBroker, receivingQueueFreeFrom, messageLenght)
+    fun arrivalTimeToBroker(deviceUID: DeviceUID, messageLenght: Int): Time =
+        computeArrivalTime(getHostByDevice(deviceUID), hostBroker, receivingQueueFreeFrom, messageLenght)
 
-    fun delayToReceive(deviceUID: DeviceUID, messageLenght: Int): Time =
-        computeDelay(hostBroker, getHostByDevice(deviceUID), sendingQueueFreeFrom, messageLenght)
+    fun arrivalTimeToSubscriber(deviceUID: DeviceUID, messageLenght: Int): Time =
+        computeArrivalTime(hostBroker, getHostByDevice(deviceUID), sendingQueueFreeFrom, messageLenght)
 
     private fun getHostByDevice(deviceUID: DeviceUID) =
         checkNotNull(hosts.find { it.devices.contains(deviceUID) })
 
-    private fun computeDelay(h1: Host, h2: Host, queueTime: Time, messageLenght: Int): Time {
+    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLenght: Int): Time {
         return maxTime(queueTime, clock.time)
             .plusMillis(messageLenght / hostBroker.getBandwidth()) // they are millis???
             .plus(computeRTTBetweenHosts(h1, h2))

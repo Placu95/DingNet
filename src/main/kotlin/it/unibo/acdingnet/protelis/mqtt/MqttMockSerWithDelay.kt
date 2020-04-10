@@ -13,10 +13,9 @@ class MqttMockSerWithDelay(
 ) : MqttMockSer() {
 
     override fun publish(topic: String, message: Any) {
-        val delay = physicalNetwork.delayToPublish(deviceUID, computeLength(message))
-        clock.addTriggerOneShot(clock.time + delay) {
-            super.publish(topic, message)
-        }
+        clock.addTriggerOneShot(
+            physicalNetwork.arrivalTimeToBroker(deviceUID, computeLength(message))
+        ) { super.publish(topic, message) }
     }
 
     override fun <T> subscribe(
@@ -26,10 +25,9 @@ class MqttMockSerWithDelay(
         messageConsumer: (topic: String, message: T) -> Unit
     ) {
         super.subscribe(subscriber, topicFilter, classMessage) { topic, message ->
-            val delay = physicalNetwork.delayToReceive(deviceUID, computeLength(message))
-            clock.addTriggerOneShot(clock.time + delay) {
-                messageConsumer.invoke(topic, message)
-            }
+            clock.addTriggerOneShot(
+                physicalNetwork.arrivalTimeToSubscriber(deviceUID, computeLength(message))
+            ) { messageConsumer.invoke(topic, message) }
         }
     }
 
