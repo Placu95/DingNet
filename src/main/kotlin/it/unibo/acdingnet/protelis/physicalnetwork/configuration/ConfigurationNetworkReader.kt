@@ -41,7 +41,7 @@ data class ConfigurationNetwork(
 
 data class BrokerHostConfig(
     val type: HostType,
-    val bandwidth: Double,
+    val dataRate: Double,
     val id: String? = null
 ) {
     companion object : ConfigSpec("") {
@@ -51,7 +51,7 @@ data class BrokerHostConfig(
 
 data class HostConfig(
     val type: HostType,
-    val bandwidth: Double? = null,
+    val dataRate: Double? = null,
     val id: String? = null
 ) {
     companion object : ConfigSpec("") {

@@ -9,11 +9,11 @@ dHostBroker = 5
 
 [brokerHostConfig]
 type = "CLOUD"
-bandwidth = 125
+dataRate = 43e6
 
 [[hostsConfig]]
     type = "CLOUD"
     id = "c000"
 [[hostsConfig]]
     type = "EDGE"
-    bandwidth = 10
+    dataRate = 10

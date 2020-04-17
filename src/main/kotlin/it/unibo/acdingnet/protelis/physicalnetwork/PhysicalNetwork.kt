@@ -19,10 +19,10 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
     init {
         val brokerConfig = reader.brokerHostConfig
         val brokerId = brokerConfig.id ?: "host_broker"
-        hostBroker = Host(brokerId, brokerConfig.type, brokerConfig.bandwidth)
+        hostBroker = Host(brokerId, brokerConfig.type, brokerConfig.dataRate)
 
         hosts = reader.hostsConfig.mapIndexed { i, it ->
-            Host(it.id ?: "${it.type}_$i", it.type, it.bandwidth)
+            Host(it.id ?: "${it.type}_$i", it.type, it.dataRate)
         }.toSet()
             .plus(hostBroker)
     }
