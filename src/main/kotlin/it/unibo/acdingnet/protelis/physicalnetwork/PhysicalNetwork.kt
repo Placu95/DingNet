@@ -7,6 +7,7 @@ import it.unibo.acdingnet.protelis.util.skip
 import org.protelis.lang.datatype.DeviceUID
 import util.time.DoubleTime
 import util.time.Time
+import util.time.TimeUnit
 
 class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
 
@@ -73,11 +74,10 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
     private fun getHostByDevice(deviceUID: DeviceUID) =
         checkNotNull(hosts.find { it.devices.contains(deviceUID) })
 
-    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLength: Int): Time {
-        return maxTime(queueTime, clock.time)
-            .plusMillis(messageLength / hostBroker.getBandwidth()) // they are millis???
-            .plus(computeRTTBetweenHosts(h1, h2))
-    }
+    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLength: Int): Time =
+        maxTime(queueTime, clock.time) +
+            DoubleTime(messageLength / hostBroker.getDataRate(), TimeUnit.SECONDS) +
+            (computeRTTBetweenHosts(h1, h2))
 
     private fun maxTime(t1: Time, t2: Time) = if (t1.isAfter(t2)) t1 else t2
 

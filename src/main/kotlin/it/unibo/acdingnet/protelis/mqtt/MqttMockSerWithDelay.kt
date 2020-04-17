@@ -37,5 +37,5 @@ class MqttMockSerWithDelay(
             is TransmissionWrapper -> message.transmission.content
             else -> message
         }
-    ).length
+    ).length * Char.SIZE_BITS
 }
