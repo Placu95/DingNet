@@ -25,7 +25,6 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         hosts = reader.hostsConfig.mapIndexed { i, it ->
             Host(it.id ?: "${it.type}_$i", it.type, it.dataRate)
         }.toSet()
-            .plus(hostBroker)
     }
 
     fun addNodes(edgeNodes: Collection<GenericNode>, nodes: Collection<GenericNode>) {
@@ -71,8 +70,15 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         return time
     }
 
-    private fun getHostByDevice(deviceUID: DeviceUID) =
-        checkNotNull(hosts.find { it.devices.contains(deviceUID) })
+    private fun getHostByDevice(deviceUID: DeviceUID): Host {
+        val h = hosts.find { it.devices.contains(deviceUID) }
+        h?.let { return it }
+        if (hostBroker.devices.contains(deviceUID)) {
+            return hostBroker
+        } else {
+            throw IllegalStateException()
+        }
+    }
 
     private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLength: Int): Time =
         maxTime(queueTime, clock.time) +
