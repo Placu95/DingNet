@@ -126,10 +126,11 @@ object NetworkStatistic {
 
     enum class Type { UPLOAD, DOWNLOAD }
 
-    var delays: Map<DeviceUID, List<Pair<Type, Time>>> = emptyMap()
+    var delays: MutableMap<DeviceUID, MutableList<Pair<Type, Time>>> = mutableMapOf()
     private set
 
     fun addDelay(deviceUID: DeviceUID, delay: Time, type: Type) {
-        delays += deviceUID to (delays.getOrDefault(deviceUID, emptyList()) + Pair(type, delay))
+        delays[deviceUID] = (delays.getOrDefault(deviceUID, mutableListOf())
+            .also { it.add(Pair(type, delay)) })
     }
 }
