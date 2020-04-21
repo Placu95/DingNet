@@ -22,7 +22,7 @@ import java.util.List;
 public class Gateway extends NetworkEntity {
 
     private List<MoteProbe> subscribedMoteProbes;
-    private final MqttClientBasicApi mqttClient;
+    private MqttClientBasicApi mqttClient;
     private final ResponseStrategy responseStrategy;
 
     /**
@@ -104,5 +104,12 @@ public class Gateway extends NetworkEntity {
 
     public MqttClientBasicApi getMqttClient() {
         return mqttClient;
+    }
+
+    public Gateway setMqttClient(MqttClientBasicApi mqttClient) {
+        this.mqttClient.disconnect();
+        this.mqttClient = mqttClient;
+        responseStrategy.init(this, getEnvironment());
+        return this;
     }
 }
