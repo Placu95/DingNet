@@ -141,6 +141,10 @@ public class SimulationRunner {
         return protelisApplication;
     }
 
+    public NetworkServer getNetworkServer() {
+        return this.networkServer;
+    }
+
     public void setApproach(String name) {
         var selectedAlgorithm = algorithms.stream()
             .filter(o -> o.getName().equals(name))
