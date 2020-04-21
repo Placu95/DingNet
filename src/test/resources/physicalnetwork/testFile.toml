@@ -1,5 +1,7 @@
 [configurationNetwork]
+# probability of LoRa device on edge
 gamma = 0.1
+# probability of device on smartphone
 beta = 0.2
 dee = 1
 dcc = 2
