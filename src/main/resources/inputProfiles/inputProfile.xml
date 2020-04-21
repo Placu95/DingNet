@@ -6,7 +6,7 @@
         <simulationDuration>120</simulationDuration>
         <timeUnit>Hours</timeUnit>
         <protelisApp>
-            <protelisProgram>AirQualityMonitoring</protelisProgram>
+            <protelisProgram>Acsos</protelisProgram>
         </protelisApp>
         <QoS>
             <adaptationGoal type="interval">
