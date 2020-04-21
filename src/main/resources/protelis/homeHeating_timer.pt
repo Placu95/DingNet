@@ -4,11 +4,11 @@ import it.unibo.acdingnet.protelis.util.Const.ProtelisEnv.*
 import org.protelis.lang.datatype.Option.*
 import protelis:state:time
 
-public def decreaseTemp() = env.put(CURRENT_TEMP, rep (v <- env.get(CURRENT_TEMP)) {
+public def decreaseTemp() = self.setCurrentTemp(rep (v <- env.get(CURRENT_TEMP)) {
 	cyclicFunction(1800, { self.roundToDecimal(v - self.getDecreaseDelta()) }, v)
 })
 
-public def increaseTemp() = env.put(CURRENT_TEMP, rep (v <- env.get(CURRENT_TEMP)) {
+public def increaseTemp() = self.setCurrentTemp(rep (v <- env.get(CURRENT_TEMP)) {
 	cyclicFunction(1800, { self.roundToDecimal(v + self.getIncreaseDelta()) }, v)
 })
 
