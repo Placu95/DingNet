@@ -76,7 +76,8 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
             HostType.CLOUD -> configurationNetwork.dsc
             else -> throw IllegalStateException()
         }
-        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)//type is irrelevant
+        // type is irrelevant
+        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)
         return delay
     }
 
