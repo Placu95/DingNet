@@ -72,11 +72,11 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
 
     fun computeDelayPhysicalSmartphoneToProtelisNode(deviceUID: DeviceUID): Time {
         val delay = when (getHostByDevice(deviceUID).type) {
-            HostType.SMARTPHONE -> DoubleTime.zero() //configurationNetwork.dss
+            HostType.SMARTPHONE -> configurationNetwork.dLocalhost
             HostType.CLOUD -> configurationNetwork.dsc
             else -> throw IllegalStateException()
         }
-        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)//type is indifferent
+        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)//type is irrelevant
         return delay
     }
 
@@ -99,7 +99,7 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
 
     private fun computeRTTBetweenHosts(h1: Host, h2: Host): Time {
         if (h1 == h2) {
-            return configurationNetwork.dHostBroker
+            return configurationNetwork.dLocalhost
         }
         return when (h1.type) {
             HostType.CLOUD -> when (h2.type) {

@@ -14,7 +14,7 @@ data class ConfigurationNetwork(
     val dcc: Time,
     val dec: Time,
     val dsc: Time,
-    val dHostBroker: Time
+    val dLocalhost: Time
 ) {
     init {
         check(gamma in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
@@ -28,11 +28,11 @@ data class ConfigurationNetwork(
         private val dcc by required<Double>()
         private val dec by required<Double>()
         private val dsc by required<Double>()
-        private val dHostBroker by required<Double>()
+        private val dLocalhost by required<Double>()
 
         fun read(config: Config) = ConfigurationNetwork(
             config[gamma], config[beta], toTime(config[dee]), toTime(config[dcc]),
-            toTime(config[dec]), toTime(config[dsc]), toTime(config[dHostBroker])
+            toTime(config[dec]), toTime(config[dsc]), toTime(config[dLocalhost])
         )
 
         private fun toTime(t: Double) = DoubleTime(t, TimeUnit.MILLIS)
