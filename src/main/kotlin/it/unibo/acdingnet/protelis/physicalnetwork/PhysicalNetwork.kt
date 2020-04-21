@@ -86,7 +86,7 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         if (hostBroker.devices.contains(deviceUID)) {
             return hostBroker
         } else {
-            throw IllegalStateException()
+            throw IllegalStateException("$deviceUID not found")
         }
     }
 
