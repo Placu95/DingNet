@@ -9,6 +9,7 @@ import it.unibo.acdingnet.protelis.dingnetwrapper.BuildingNodeWrapper
 import it.unibo.acdingnet.protelis.dingnetwrapper.SensorNodeWrapper
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.model.SensorType
+import it.unibo.acdingnet.protelis.mqtt.MqttMockCastWithDelay
 import it.unibo.acdingnet.protelis.mqtt.MqttMockSerWithDelay
 import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
 import it.unibo.acdingnet.protelis.neighborhood.Node
@@ -73,7 +74,7 @@ class Acsos(
         val neighUID = StringUID("NeighborhoodManager")
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
-            MqttMockSerWithDelay(physicalNetwork, timer, neighUID),
+            MqttMockCastWithDelay(physicalNetwork, timer, neighUID),
             Const.NEIGHBORHOOD_RANGE,
             nodes
         )
@@ -83,21 +84,15 @@ class Acsos(
             .filter { it !is UserMote }
             .map {
                 val id = StringUID("lora_${it.eui}")
-                val client = MqttClientHelper.addLoRaWANAdapters(
-                    MqttMockSerWithDelay(physicalNetwork, timer, id)
-                )
                 SensorNodeWrapper(
                     ProtelisLoader.parse(protelisProgram),
                     DoubleTime(random.nextInt(100).toDouble()),
                     900,
                     id,
                     Const.APPLICATION_ID,
-                    client,
-                    client,
-                    LatLongPosition(
-                        it.pathPosition.latitude,
-                        it.pathPosition.longitude
-                    ),
+                    getNewClientSer(id),
+                    getNewClientCast(id),
+                    it.pathPosition.toLatLongPosition(),
                     it.sensors.map { s -> SensorType.valueOf("$s") },
                     timer,
                     neigh.getNeighborhoodByNodeId(id).map { n -> n.uid }.toSet()
@@ -112,7 +107,7 @@ class Acsos(
                 900,
                 it.uid,
                 Const.APPLICATION_ID,
-                MqttMockSerWithDelay(physicalNetwork, timer, it.uid),
+                getNewClientCast(it.uid),
                 it.position,
                 Utils.roundToDecimal(random.nextDouble(Const.MIN_TEMP, Const.MAX_TEMP)),
                 0.1,
@@ -129,21 +124,23 @@ class Acsos(
 
         // adds networkServer and gateway to a host and change their mqttClient
         val idClientNetServer = StringUID("NetworkServer")
-        val clientNetServer = MqttClientHelper.addLoRaWANAdapters(
-            MqttMockSerWithDelay(physicalNetwork, timer, idClientNetServer))
         simulationRunner.networkServer.also {
-            it.setMqttClientToApp(clientNetServer)
-            it.setMqttClientToGateway(clientNetServer)
+            it.setMqttClientToApp(getNewClientSer(idClientNetServer))
+            it.setMqttClientToGateway(getNewClientCast(idClientNetServer))
         }
         physicalNetwork.addDeviceTo(idClientNetServer, HostType.EDGE)
         simulationRunner.environment.gateways.forEach {
             val id = StringUID("G_${it.eui}")
-            val client = MqttClientHelper.addLoRaWANAdapters(
-                MqttMockSerWithDelay(physicalNetwork, timer, id))
-            it.mqttClient = client
+            it.mqttClient = getNewClientCast(id)
             physicalNetwork.addDeviceTo(id, HostType.EDGE)
         }
     }
+
+    private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
+        MqttMockSerWithDelay(physicalNetwork, timer, id))
+
+    private fun getNewClientCast(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
+        MqttMockCastWithDelay(physicalNetwork, timer, id))
 
     override fun getPainters(): List<Painter<JXMapViewer>> = emptyList()
 
