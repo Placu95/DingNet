@@ -1,6 +1,7 @@
 package it.unibo.acdingnet.protelis.application
 
 import iot.GlobalClock
+import iot.SimulationRunner
 import iot.mqtt.TransmissionWrapper
 import iot.networkentity.Mote
 import iot.networkentity.UserMote
@@ -11,6 +12,7 @@ import it.unibo.acdingnet.protelis.mqtt.MqttMockSerWithDelay
 import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
 import it.unibo.acdingnet.protelis.neighborhood.Node
 import it.unibo.acdingnet.protelis.node.GenericNode
+import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
 import it.unibo.acdingnet.protelis.util.Const
@@ -29,8 +31,9 @@ class Acsos(
 ) :
     ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
+    private val seed = 2L
     private val neigh: NeighborhoodManager
-    private val random = Random(2)
+    private val random = Random(seed)
     private val loraNodes: List<SensorNodeWrapper>
     private val otherNodes: List<GenericNode>
     private val physicalNetwork: PhysicalNetwork = PhysicalNetwork(Reader(""), timer)
@@ -46,7 +49,7 @@ class Acsos(
                 )
             )
         }.toMutableSet()
-        // add to nodes set the other nodes
+        // TODO add to nodes set the other nodes
         val neighUID = StringUID("NeighborhoodManager")
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
@@ -59,7 +62,7 @@ class Acsos(
         loraNodes = motes
             .filter { it !is UserMote }
             .map {
-                val id = StringUID("lora_" + it.eui)
+                val id = StringUID("lora_${it.eui}")
                 val client = MqttClientHelper.addLoRaWANAdapters(
                     MqttMockSerWithDelay(physicalNetwork, timer, id)
                 )
@@ -81,13 +84,29 @@ class Acsos(
                 )
             }
 
-        // creates other nodes
+        // TODO creates other nodes
         otherNodes = emptyList()
 
         // assigns node to hosts
         physicalNetwork.addNodes(loraNodes, otherNodes)
 
         // adds networkServer and gateway to a host and change their mqttClient
+        val idClientNetServer = StringUID("NetworkServer")
+        val clientNetServer = MqttClientHelper.addLoRaWANAdapters(
+            MqttMockSerWithDelay(physicalNetwork, timer, idClientNetServer))
+        SimulationRunner.getInstance().networkServer.also {
+            it.setMqttClientToApp(clientNetServer)
+            it.setMqttClientToGateway(clientNetServer)
+        }
+        physicalNetwork.addDeviceTo(idClientNetServer, HostType.EDGE)
+        SimulationRunner.getInstance().environment.gateways.forEach {
+            val id = StringUID("G_${it.eui}")
+            val client = MqttClientHelper.addLoRaWANAdapters(
+                MqttMockSerWithDelay(physicalNetwork, timer, id))
+            it.mqttClient = client
+            physicalNetwork.addDeviceTo(id, HostType.EDGE)
+        }
+
 
         // adds neighborhood manager to a host
         physicalNetwork.addDeviceToBrokerHost(neighUID)
