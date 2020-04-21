@@ -12,6 +12,7 @@ import iot.strategy.response.gateway.ResponseStrategy;
 import iot.strategy.response.gateway.SendPacketImmediately;
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi;
 import selfadaptation.instrumentation.MoteProbe;
+import util.Pair;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -107,7 +108,12 @@ public class Gateway extends NetworkEntity {
     }
 
     public Gateway setMqttClient(MqttClientBasicApi mqttClient) {
-        this.mqttClient.disconnect();
+        getEnvironment().getMotes().stream()
+            .map(m -> new Pair<>(m.getApplicationEUI(), m.getEUI()))
+            .forEach(m -> getMqttClient().unsubscribe(
+                this,
+                Topics.getNetServerToGateway(m.getLeft(), getEUI(), m.getRight()))
+            );
         this.mqttClient = mqttClient;
         responseStrategy.init(this, getEnvironment());
         return this;

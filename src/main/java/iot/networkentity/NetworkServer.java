@@ -122,13 +122,13 @@ public class NetworkServer {
     }
 
     public void setMqttClientToApp(MqttClientBasicApi mqttClientToApp) {
-        this.mqttClientToApp.disconnect();
+        this.mqttClientToApp.unsubscribe(this, Topics.getAppToNetServer("+", "+"));
         this.mqttClientToApp = mqttClientToApp;
         subscribeToApps();
     }
 
     public void setMqttClientToGateway(MqttClientBasicApi mqttClientToGateway) {
-        this.mqttClientToGateway.disconnect();
+        this.mqttClientToGateway.unsubscribe(this, Topics.getGatewayToNetServer("+", "+", "+"));
         this.mqttClientToGateway = mqttClientToGateway;
         subscribeToGateways();
     }
