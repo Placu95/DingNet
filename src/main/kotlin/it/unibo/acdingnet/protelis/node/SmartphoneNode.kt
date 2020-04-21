@@ -25,7 +25,7 @@ class SmartphoneNode(
     private val timer: GlobalClock,
     private val trace: GPSTrace,
     host: Host? = null,
-    neighbors: Set<StringUID>
+    neighbors: Set<StringUID>? = null
 ) : GenericNode(protelisProgram, sleepTime, deviceUID, applicationUID, mqttClient,
     initialPosition, host, neighbors) {
 

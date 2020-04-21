@@ -19,7 +19,7 @@ abstract class GenericNode(
     val execContextMqttClient: MqttClientBasicApi,
     position: LatLongPosition,
     host: Host? = null,
-    neighbors: Set<StringUID> = emptySet()
+    neighbors: Set<StringUID>? = null
 ) {
     constructor(
         protelisProgram: ProtelisProgram,
@@ -29,7 +29,7 @@ abstract class GenericNode(
         mqttClient: MqttClientBasicApi,
         initialPosition: LatLongPosition,
         host: Host? = null,
-        neighbors: Set<StringUID> = emptySet()
+        neighbors: Set<StringUID>? = null
     ) : this(protelisProgram, sleepTime, deviceUID, applicationUID,
         mqttClient, mqttClient, initialPosition, host, neighbors)
 

@@ -18,7 +18,7 @@ open class BuildingNode(
     protected val desiredTemp: Double,
     protected val deltaTemp: Double,
     host: Host? = null,
-    neighbors: Set<StringUID> = emptySet()
+    neighbors: Set<StringUID>? = null
 ) : SensorNode(protelisProgram, sleepTime, deviceUID, applicationUID,
     netManagerMqttClient, netManagerMqttClient, position, emptyList(), host, neighbors) {
 

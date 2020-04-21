@@ -20,7 +20,7 @@ open class SensorNode(
     position: LatLongPosition,
     sensorTypes: List<SensorType>,
     host: Host? = null,
-    neighbors: Set<StringUID> = emptySet()
+    neighbors: Set<StringUID>? = null
 ) : NodeWithSensor(protelisProgram, sleepTime, sensorDeviceUID, applicationUID,
     netManagerMqttClient, execContextMqttClient, position, sensorTypes, host, neighbors) {
 

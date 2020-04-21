@@ -17,6 +17,6 @@ abstract class NodeWithSensor(
     position: LatLongPosition,
     val sensorTypes: List<SensorType>,
     host: Host? = null,
-    neighbors: Set<StringUID> = emptySet()
+    neighbors: Set<StringUID>? = null
 ) : GenericNode(protelisProgram, sleepTime, sensorDeviceUID, applicationUID,
     netManagerMqttClient, execContextMqttClient, position, host, neighbors)
