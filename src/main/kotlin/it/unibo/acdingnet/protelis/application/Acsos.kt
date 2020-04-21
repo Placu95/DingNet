@@ -16,10 +16,7 @@ import it.unibo.acdingnet.protelis.node.GenericNode
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
-import it.unibo.acdingnet.protelis.util.Const
-import it.unibo.acdingnet.protelis.util.MqttClientHelper
-import it.unibo.acdingnet.protelis.util.nextDouble
-import it.unibo.acdingnet.protelis.util.toLatLongPosition
+import it.unibo.acdingnet.protelis.util.*
 import org.jxmapviewer.JXMapViewer
 import org.jxmapviewer.painter.Painter
 import org.protelis.lang.ProtelisLoader
@@ -30,7 +27,7 @@ import java.util.*
 class Acsos(
     motes: List<Mote>,
     timer: GlobalClock,
-    protelisProgram: String = ""
+    protelisProgram: String = "protelis:homeHeating_timer"
 ) :
     ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
@@ -39,7 +36,8 @@ class Acsos(
     private val random = Random(seed)
     private val loraNodes: List<SensorNodeWrapper>
     private val otherNodes: List<GenericNode>
-    private val physicalNetwork: PhysicalNetwork = PhysicalNetwork(Reader(""), timer)
+    private val physicalNetwork: PhysicalNetwork =
+        PhysicalNetwork(Reader("/config/physicalnetwork/defaultNetworkConfig.toml"), timer)
 
     init {
         // access point to simulation runner (it is shit, but it is the fastest way)
@@ -116,7 +114,7 @@ class Acsos(
                 Const.APPLICATION_ID,
                 MqttMockSerWithDelay(physicalNetwork, timer, it.uid),
                 it.position,
-                random.nextDouble(Const.MIN_TEMP, Const.MAX_TEMP),
+                Utils.roundToDecimal(random.nextDouble(Const.MIN_TEMP, Const.MAX_TEMP)),
                 0.1,
                 timer,
                 neigh.getNeighborhoodByNodeId(it.uid).map { n -> n.uid }.toSet()

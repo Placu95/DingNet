@@ -1,15 +1,16 @@
 module protelis:homeHeating_timer
 
 import it.unibo.acdingnet.protelis.util.Const.ProtelisEnv.*
+import it.unibo.acdingnet.protelis.util.Utils.*
 import org.protelis.lang.datatype.Option.*
 import protelis:state:time
 
 public def decreaseTemp() = self.setCurrentTemp(rep (v <- env.get(CURRENT_TEMP)) {
-	cyclicFunction(1800, { self.roundToDecimal(v - self.getDecreaseDelta()) }, v)
+	cyclicFunction(1800, { roundToDecimal(v - self.getDecreaseDelta()) }, v)
 })
 
 public def increaseTemp() = self.setCurrentTemp(rep (v <- env.get(CURRENT_TEMP)) {
-	cyclicFunction(1800, { self.roundToDecimal(v + self.getIncreaseDelta()) }, v)
+	cyclicFunction(1800, { roundToDecimal(v + self.getIncreaseDelta()) }, v)
 })
 
 public def emptyFun() = 0
