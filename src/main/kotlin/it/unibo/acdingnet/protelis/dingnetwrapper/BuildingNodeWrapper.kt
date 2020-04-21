@@ -4,6 +4,7 @@ import iot.GlobalClock
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.node.BuildingNode
 import it.unibo.acdingnet.protelis.physicalnetwork.Host
+import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
 import org.protelis.lang.datatype.impl.StringUID
 import org.protelis.vm.ExecutionContext
@@ -22,7 +23,8 @@ class BuildingNodeWrapper(
     deltaTemp: Double,
     val timer: GlobalClock,
     neighbors: Set<StringUID>,
-    host: Host? = null
+    host: Host? = null,
+    private val physicalNetwork: PhysicalNetwork? = null
 ) : BuildingNode(
     protelisProgram,
     sleepTime,
@@ -43,7 +45,8 @@ class BuildingNodeWrapper(
             deltaTemp,
             applicationUID,
             execContextMqttClient,
-            networkManager
+            networkManager,
+            physicalNetwork
         )
     }
 

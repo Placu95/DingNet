@@ -70,6 +70,16 @@ class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
         return time
     }
 
+    fun computeDelayPhysicalSmartphoneToProtelisNode(deviceUID: DeviceUID): Time {
+        val delay = when (getHostByDevice(deviceUID).type) {
+            HostType.SMARTPHONE -> DoubleTime.zero() //configurationNetwork.dss
+            HostType.CLOUD -> configurationNetwork.dsc
+            else -> throw IllegalStateException()
+        }
+        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)//type is indifferent
+        return delay
+    }
+
     private fun getHostByDevice(deviceUID: DeviceUID): Host {
         val h = hosts.find { it.devices.contains(deviceUID) }
         h?.let { return it }
