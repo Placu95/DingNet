@@ -5,6 +5,7 @@ import iot.SimulationRunner
 import iot.mqtt.TransmissionWrapper
 import iot.networkentity.Mote
 import iot.networkentity.UserMote
+import it.unibo.acdingnet.protelis.dingnetwrapper.BuildingNodeWrapper
 import it.unibo.acdingnet.protelis.dingnetwrapper.SensorNodeWrapper
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.model.SensorType
@@ -17,6 +18,8 @@ import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
 import it.unibo.acdingnet.protelis.util.Const
 import it.unibo.acdingnet.protelis.util.MqttClientHelper
+import it.unibo.acdingnet.protelis.util.nextDouble
+import it.unibo.acdingnet.protelis.util.toLatLongPosition
 import org.jxmapviewer.JXMapViewer
 import org.jxmapviewer.painter.Painter
 import org.protelis.lang.ProtelisLoader
@@ -39,17 +42,36 @@ class Acsos(
     private val physicalNetwork: PhysicalNetwork = PhysicalNetwork(Reader(""), timer)
 
     init {
-        // creates node for neighborhood manager and neighborhood manager
+        // access point to simulation runner (it is shit, but it is the fastest way)
+        val simulationRunner = SimulationRunner.getInstance()
+
+        // creates node for neighborhood manager
         val nodes: MutableSet<Node> = motes.map {
             Node(
-                StringUID("" + it.eui),
+                StringUID("lora_${it.eui}"),
                 LatLongPosition(
                     it.pathPosition.latitude,
                     it.pathPosition.longitude
                 )
             )
         }.toMutableSet()
-        // TODO add to nodes set the other nodes
+
+        // FIXME: take it form config file?
+        val numOfBuilding = 300
+        val mapHelper = simulationRunner.environment.mapHelper
+        val maxX = simulationRunner.environment.maxXpos
+        val maxY = simulationRunner.environment.maxYpos
+        val buildingNodes = (0 until numOfBuilding).map {
+            Node(
+                StringUID("building_$it"),
+                mapHelper.toGeoPosition(random.nextInt(maxX), random.nextInt(maxY))
+                .toLatLongPosition()
+            )
+        }
+
+        nodes.addAll(buildingNodes)
+
+        // create neighborhood manager
         val neighUID = StringUID("NeighborhoodManager")
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
@@ -84,32 +106,45 @@ class Acsos(
                 )
             }
 
-        // TODO creates other nodes
-        otherNodes = emptyList()
+        // creates building nodes
+        otherNodes = buildingNodes.map {
+            BuildingNodeWrapper(
+                ProtelisLoader.parse(protelisProgram),
+                DoubleTime(random.nextInt(100).toDouble()).plusMinutes(1.0),
+                900,
+                it.uid,
+                Const.APPLICATION_ID,
+                MqttMockSerWithDelay(physicalNetwork, timer, it.uid),
+                it.position,
+                random.nextDouble(Const.MIN_TEMP, Const.MAX_TEMP),
+                0.1,
+                timer,
+                neigh.getNeighborhoodByNodeId(it.uid).map { n -> n.uid }.toSet()
+            )
+        }
 
         // assigns node to hosts
         physicalNetwork.addNodes(loraNodes, otherNodes)
+
+        // adds neighborhood manager to a host
+        physicalNetwork.addDeviceToBrokerHost(neighUID)
 
         // adds networkServer and gateway to a host and change their mqttClient
         val idClientNetServer = StringUID("NetworkServer")
         val clientNetServer = MqttClientHelper.addLoRaWANAdapters(
             MqttMockSerWithDelay(physicalNetwork, timer, idClientNetServer))
-        SimulationRunner.getInstance().networkServer.also {
+        simulationRunner.networkServer.also {
             it.setMqttClientToApp(clientNetServer)
             it.setMqttClientToGateway(clientNetServer)
         }
         physicalNetwork.addDeviceTo(idClientNetServer, HostType.EDGE)
-        SimulationRunner.getInstance().environment.gateways.forEach {
+        simulationRunner.environment.gateways.forEach {
             val id = StringUID("G_${it.eui}")
             val client = MqttClientHelper.addLoRaWANAdapters(
                 MqttMockSerWithDelay(physicalNetwork, timer, id))
             it.mqttClient = client
             physicalNetwork.addDeviceTo(id, HostType.EDGE)
         }
-
-
-        // adds neighborhood manager to a host
-        physicalNetwork.addDeviceToBrokerHost(neighUID)
     }
 
     override fun getPainters(): List<Painter<JXMapViewer>> = emptyList()
