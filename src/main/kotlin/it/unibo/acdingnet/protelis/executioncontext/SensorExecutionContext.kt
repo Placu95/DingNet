@@ -3,6 +3,8 @@ package it.unibo.acdingnet.protelis.executioncontext
 import it.unibo.acdingnet.protelis.model.SensorType
 import it.unibo.acdingnet.protelis.node.SensorNode
 import it.unibo.acdingnet.protelis.util.Const
+import it.unibo.acdingnet.protelis.util.Const.MAX_TEMP
+import it.unibo.acdingnet.protelis.util.Const.MIN_TEMP
 import it.unibo.acdingnet.protelis.util.Interpolator
 import it.unibo.acdingnet.protelis.util.toLatLongPosition
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
@@ -45,8 +47,8 @@ open class SensorExecutionContext @JvmOverloads constructor(
     }
 
     fun temperatureByPollution(pollutionValue: Double): Double = when {
-        pollutionValue < 1 -> 25.0
-        pollutionValue > 100 -> 17.0
+        pollutionValue < 1 -> MAX_TEMP
+        pollutionValue > 100 -> MIN_TEMP
         else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
     }
     //endregion

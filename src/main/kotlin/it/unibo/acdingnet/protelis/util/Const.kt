@@ -6,6 +6,8 @@ object Const {
     const val NEIGHBORHOOD_RANGE = 1000.0
     const val MOTT_ADDRESS = "tcp://test.mosquitto.org:1883"
     const val MQTT_CLIENT_ID = "testFenomeno1995-app"
+    const val MIN_TEMP = 17.0
+    const val MAX_TEMP = 25.0
 
     object ProtelisEnv {
         const val IAQLEVEL = "iaqLevel"
