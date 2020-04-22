@@ -9,13 +9,13 @@ import it.unibo.acdingnet.protelis.mqtt.MqttMockSerWithDelay
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.NetworkStatistic
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
-import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
+import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
 import org.protelis.lang.datatype.impl.StringUID
 
 class TestNetworkDelay : StringSpec() {
 
     private val configFilePath = "/physicalnetwork/testFile.toml"
-    private val configurationReader = Reader(configFilePath)
+    private val configurationReader = Configuration(configFilePath)
     private val clock = GlobalClock()
     private val network = PhysicalNetwork(configurationReader, clock)
 

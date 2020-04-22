@@ -1,4 +1,5 @@
 [configurationNetwork]
+seed = 2
 # probability of LoRa device on edge
 gamma = 0.4
 # probability of device on smartphone

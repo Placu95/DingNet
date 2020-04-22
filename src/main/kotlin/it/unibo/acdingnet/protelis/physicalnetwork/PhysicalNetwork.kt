@@ -9,20 +9,20 @@ import util.time.DoubleTime
 import util.time.Time
 import util.time.TimeUnit
 
-class PhysicalNetwork(reader: Reader, private val clock: GlobalClock) {
+class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClock) {
 
     private val hostBroker: Host
     private var receivingQueueFreeFrom: Time = DoubleTime.zero()
     private var sendingQueueFreeFrom: Time = DoubleTime.zero()
     private var hosts: Set<Host>
-    private val configurationNetwork = reader.configurationNetwork
+    private val configurationNetwork = configuration.configurationNetwork
 
     init {
-        val brokerConfig = reader.brokerHostConfig
+        val brokerConfig = configuration.brokerHostConfig
         val brokerId = brokerConfig.id ?: "host_broker"
         hostBroker = Host(brokerId, brokerConfig.type, brokerConfig.dataRate)
 
-        hosts = reader.hostsConfig.mapIndexed { i, it ->
+        hosts = configuration.hostsConfig.mapIndexed { i, it ->
             Host(it.id ?: "${it.type}_$i", it.type, it.dataRate)
         }.toSet()
     }

@@ -61,7 +61,7 @@ data class HostConfig(
     }
 }
 
-class Reader(path: String) {
+class Configuration(path: String) {
 
     val configurationNetwork: ConfigurationNetwork
     val brokerHostConfig: BrokerHostConfig
@@ -72,7 +72,7 @@ class Reader(path: String) {
             addSpec(ConfigurationNetwork)
             addSpec(BrokerHostConfig)
             addSpec(HostConfig)
-        }.from().toml.inputStream(Reader::class.java.getResourceAsStream(path))
+        }.from().toml.inputStream(Configuration::class.java.getResourceAsStream(path))
 
         configurationNetwork = ConfigurationNetwork.read(config)
         brokerHostConfig = config[BrokerHostConfig.brokerHostConfig]
