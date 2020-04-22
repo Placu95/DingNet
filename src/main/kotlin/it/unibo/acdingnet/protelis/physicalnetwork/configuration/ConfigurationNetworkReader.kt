@@ -8,6 +8,7 @@ import util.time.Time
 import util.time.TimeUnit
 
 data class ConfigurationNetwork(
+    val seed: Long,
     val gamma: Double,
     val beta: Double,
     val dee: Time,
@@ -22,6 +23,7 @@ data class ConfigurationNetwork(
     }
 
     companion object : ConfigSpec("configurationNetwork") {
+        private val seed by required<Long>()
         private val gamma by required<Double>()
         private val beta by required<Double>()
         private val dee by required<Double>()
