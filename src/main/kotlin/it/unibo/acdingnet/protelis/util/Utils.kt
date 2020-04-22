@@ -2,6 +2,7 @@ package it.unibo.acdingnet.protelis.util
 
 import org.protelis.lang.datatype.Tuple
 import org.protelis.lang.datatype.impl.ArrayTupleImpl
+import util.time.Time
 import java.math.RoundingMode
 
 object Utils {
@@ -17,4 +18,6 @@ object Utils {
         tuple.distinctBy { (it as ArrayTupleImpl)[0] }.forEach { ret = ret.append(it) }
         return ret
     }
+
+    fun maxTime(t1: Time, t2: Time) = if (t1.isAfter(t2)) t1 else t2
 }

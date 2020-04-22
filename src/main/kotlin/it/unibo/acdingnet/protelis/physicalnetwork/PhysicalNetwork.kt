@@ -2,7 +2,8 @@ package it.unibo.acdingnet.protelis.physicalnetwork
 
 import iot.GlobalClock
 import it.unibo.acdingnet.protelis.node.GenericNode
-import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Reader
+import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
+import it.unibo.acdingnet.protelis.util.Utils.maxTime
 import it.unibo.acdingnet.protelis.util.skip
 import org.protelis.lang.datatype.DeviceUID
 import util.time.DoubleTime
@@ -95,8 +96,6 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
         maxTime(queueTime, clock.time) +
             DoubleTime(messageLength / hostBroker.getDataRate(), TimeUnit.SECONDS) +
             (computeRTTBetweenHosts(h1, h2))
-
-    private fun maxTime(t1: Time, t2: Time) = if (t1.isAfter(t2)) t1 else t2
 
     private fun computeRTTBetweenHosts(h1: Host, h2: Host): Time {
         if (h1 == h2) {
