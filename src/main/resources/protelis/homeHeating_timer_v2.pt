@@ -31,8 +31,8 @@ let neighborsOpt = nbr(mux(env.has(IAQLEVEL)) {
 
 let neighbors = foldUnion([neighborsOpt]).filter { it.isPresent() }.map { it.get() }
 let pollutionField = nbr(neighbors).map { it.set(1, self.distanceTo(it.get(1))) }
-let sensorValues = foldUnion(pollutionField)
-
+let sensorValues = distinctByUID(foldUnion(pollutionField))
+self.log(sensorValues.toString())
 let maxTemperature = self.temperatureByPollution(idw(sensorValues))
 if (env.has(CURRENT_TEMP)) {
     env.put(MAX_TEMP, maxTemperature)
