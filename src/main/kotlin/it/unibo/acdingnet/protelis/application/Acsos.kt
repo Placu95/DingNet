@@ -33,7 +33,7 @@ import java.util.*
 class Acsos(
     motes: List<Mote>,
     timer: GlobalClock,
-    protelisProgram: String = "protelis:homeHeating_timer"
+    protelisProgram: String = "protelis:homeHeating_timer_v2"
 ) :
     ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
@@ -96,8 +96,8 @@ class Acsos(
                     900,
                     id,
                     Const.APPLICATION_ID,
-                    getNewClientSer(id),
                     getNewClientCast(id),
+                    getNewClientSer(id),
                     it.pathPosition.toLatLongPosition(),
                     it.sensors.map { s -> SensorType.valueOf("$s") },
                     timer,
