@@ -55,10 +55,10 @@ public abstract class Application {
     }
 
     /**
-     * Store the simulation results to the file represented by the pathFile parameter
-     * @param pathFile file to save the simulation results in
+     * Store the simulation results to the directory represented by the pathFile parameter
+     * @param pathDir directory to save the simulation results in
      */
-    public void storeSimulationResults(String pathFile) {
+    public void storeSimulationResults(String pathDir) {
 
     }
 

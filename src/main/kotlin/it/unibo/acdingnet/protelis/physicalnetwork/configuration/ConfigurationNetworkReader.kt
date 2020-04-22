@@ -22,6 +22,13 @@ data class ConfigurationNetwork(
         check(beta in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
     }
 
+    fun print() = "$this"
+        .drop(21) // "ConfigurationNetwork("
+        .dropLast(1) //")"
+        .replace("=", " = ")
+        .replace("DoubleTime[time = ", "")
+        .replace(", timeUnit = ", "[")
+
     companion object : ConfigSpec("configurationNetwork") {
         private val seed by required<Long>()
         private val gamma by required<Double>()
@@ -32,7 +39,7 @@ data class ConfigurationNetwork(
         private val dsc by required<Double>()
         private val dLocalhost by required<Double>()
 
-        fun read(config: Config) = ConfigurationNetwork(
+        fun read(config: Config) = ConfigurationNetwork(config[seed],
             config[gamma], config[beta], toTime(config[dee]), toTime(config[dcc]),
             toTime(config[dec]), toTime(config[dsc]), toTime(config[dLocalhost])
         )
