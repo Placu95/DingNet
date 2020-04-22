@@ -128,8 +128,25 @@ object NetworkStatistic {
     var delays: MutableMap<DeviceUID, MutableList<Pair<Type, Time>>> = mutableMapOf()
     private set
 
+    var count = 0
+    var delayToT: Time = DoubleTime.zero()
+    var delayMax: Time = DoubleTime.zero()
+
     fun addDelay(deviceUID: DeviceUID, delay: Time, type: Type) {
+/*
         delays[deviceUID] = (delays.getOrDefault(deviceUID, mutableListOf())
             .also { it.add(Pair(type, delay)) })
+*/
+        count++
+        delayToT += delay
+        if (delay.isAfter(delayMax)) {
+            delayMax = delay
+        }
+    }
+
+    fun reset() {
+        count = 0
+        delayToT = DoubleTime.zero()
+        delayMax = DoubleTime.zero()
     }
 }
