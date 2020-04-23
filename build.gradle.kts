@@ -107,13 +107,13 @@ val batch by tasks.register<DefaultTask>("batch") {
 
 val createConifgFile by tasks.register<JavaExec>("createConifgFile") {
     dependsOn("build")
-    
+
     val configFile: String by project
     val configDir = File(projectDir, ".temp")
 
     if (!configDir.exists() || !configDir.isDirectory) {
         configDir.mkdir()
-    }    
+    }
     main = "it.unibo.gradle.CartesianProduct"
     args(configDir.absolutePath, configFile)
     classpath = sourceSets["main"].runtimeClasspath
