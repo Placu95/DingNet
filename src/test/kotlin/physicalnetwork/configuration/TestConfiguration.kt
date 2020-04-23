@@ -18,7 +18,7 @@ class TestConfiguration : StringSpec() {
 
     init {
         "test reading of the free variables" {
-            val configurationNetwork = ConfigurationNetwork(1L,0.1, 0.2, toTime(1.0),
+            val configurationNetwork = ConfigurationNetwork(1L, 0.1, 0.2, toTime(1.0),
                 toTime(2.0), toTime(3.0), toTime(4.0), toTime(5.0))
             configurationReader.configurationNetwork shouldBe configurationNetwork
         }
