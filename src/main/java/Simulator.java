@@ -10,6 +10,7 @@ import util.time.Time;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 /**
  * Simulator starter class.
@@ -18,6 +19,12 @@ import java.nio.charset.StandardCharsets;
  * otherwise it starts the GUI
  */
 public class Simulator {
+
+    // FIXME I don't like it here, it require a better solution
+    private static String networkConfigFilePath = null;
+    public static Optional<String> getNetworkConfigFilePath() {
+        return Optional.ofNullable(networkConfigFilePath);
+    }
 
     public static void main(String[] args) {
 
@@ -35,6 +42,10 @@ public class Simulator {
             new Option("of", "outputFile", true, "path of the output file");
         outputFile.setRequired(false);
         options.addOption(outputFile);
+        Option networkConfigFile =
+            new Option("nf", "networkConfigFile", true, "path of the network config file");
+        networkConfigFile.setRequired(false);
+        options.addOption(networkConfigFile);
 
         CommandLine cmd = null;
 
@@ -57,6 +68,7 @@ public class Simulator {
         }
 
         if (cmd.hasOption("configurationFile")) {
+            networkConfigFilePath = cmd.getOptionValue("networkConfigFile");
             var file = new File(cmd.getOptionValue("configurationFile"));
             simulationRunner.loadConfigurationFromFile(file);
             simulationRunner.getSimulation().setInputProfile(simulationRunner.getInputProfiles().get(0));
