@@ -24,7 +24,7 @@ data class ConfigurationNetwork(
 
     fun print() = "$this"
         .drop(21) // "ConfigurationNetwork("
-        .dropLast(1) //")"
+        .dropLast(1) // ")"
         .replace("=", " = ")
         .replace("DoubleTime[time = ", "")
         .replace(", timeUnit = ", "[")

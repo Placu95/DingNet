@@ -20,6 +20,7 @@ import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
 import it.unibo.acdingnet.protelis.util.*
 import it.unibo.acdingnet.protelis.util.Utils.maxTime
+import it.unibo.acdingnet.protelis.util.Utils.roundToDecimal
 import org.jxmapviewer.JXMapViewer
 import org.jxmapviewer.painter.Painter
 import org.protelis.lang.ProtelisLoader
@@ -200,9 +201,11 @@ data class Sampling(
     val delaySumTot: Time,
     val delayMaxTot: Time
 ) {
-    fun print(tU: TimeUnit) = "${instant.getAs(tU)} $delayCountPartial " +
-        "${delaySumPartial.getAs(tU)} ${delayMaxPartial.getAs(tU)} $delayCountTot " +
-        "${delaySumTot.getAs(tU)} ${delayMaxTot.getAs(tU)}"
+    fun print(tU: TimeUnit) = "${printTime(instant, tU)} $delayCountPartial " +
+        "${printTime(delaySumPartial, tU)} ${printTime(delayMaxPartial, tU)} $delayCountTot " +
+        "${printTime(delaySumTot, tU)} ${printTime(delayMaxTot, tU)}"
+
+    private fun printTime(t: Time, tU: TimeUnit) = roundToDecimal(t.getAs(tU), 2).toString()
 
     companion object {
         fun header(timeUnit: TimeUnit) = "instant[${timeUnit.name}] delayCountPartial[Sum] " +
