@@ -1,3 +1,6 @@
+import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.RecursiveTask
+
 plugins {
     id("de.fayard.buildSrcVersions") version Versions.de_fayard_buildsrcversions_gradle_plugin
     application
@@ -79,17 +82,17 @@ java {
 
 val batch by tasks.register<DefaultTask>("batch") {
     val envFile: String = System.getProperty("user.home") +
-        "\\.DingNet\\config\\simulation\\placuzzi_demo_thesis.xml"
+        "\\.DingNet\\config\\simulation\\acsos2020.xml"
     val outputDir: String by project
     val configDir = File(projectDir, ".temp")
 
     dependsOn("build")
     dependsOn(createConfigFile)
     doLast {
-        configDir.listFiles()
+        val forkJoinPool = ForkJoinPool(Runtime.getRuntime().availableProcessors())
+        val jobs = configDir.listFiles()
             .filter { it.extension == "toml" }
-            .parallelStream()
-            .forEach {
+            .map {
                 tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
                     group = dingNetGroup
                     description = "Launches simulation ${it.nameWithoutExtension}"
@@ -100,8 +103,18 @@ val batch by tasks.register<DefaultTask>("batch") {
                         "-nf", it,
                         "-of", outputDir
                     )
-                }.exec()
+                }
             }
+            .map { 
+                object : RecursiveTask<Int>() {
+                    override fun compute(): Int {
+                        it.exec()
+                        return 1
+                    }
+                } 
+            }
+        jobs.forEach { forkJoinPool.execute(it) }
+        jobs.forEach { it.join() }
         configDir.deleteRecursively()
     }
 }
