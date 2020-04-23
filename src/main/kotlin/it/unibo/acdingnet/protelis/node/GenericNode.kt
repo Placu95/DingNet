@@ -57,6 +57,6 @@ abstract class GenericNode(
 
     fun runVM() {
         protelisVM.runCycle()
-        host?.addRun(deviceUID)
+        host?.addRun()
     }
 }

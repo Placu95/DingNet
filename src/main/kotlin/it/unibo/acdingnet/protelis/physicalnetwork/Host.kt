@@ -11,18 +11,17 @@ data class Host(
     var devices: Set<DeviceUID> = emptySet()
 ) {
 
-    private val devicesRun: MutableMap<DeviceUID, Int> = mutableMapOf()
+    var numOfRuns: Int = 0
+    private set
 
     fun getDataRate(): Double = checkNotNull(dataRate) { "data rate parameter is undefined" }
-
-    fun getDevicesRuns() = devicesRun.toMap()
 
     fun addDevice(deviceUID: DeviceUID) { devices += deviceUID }
 
     fun removeDevice(deviceUID: DeviceUID) { devices -= deviceUID }
 
-    fun addRun(deviceUID: DeviceUID) {
-        devicesRun[deviceUID] = (devicesRun.getOrDefault(deviceUID, 0) + 1)
+    fun addRun() {
+        numOfRuns++
     }
 
     override fun equals(other: Any?): Boolean = when (other) {
