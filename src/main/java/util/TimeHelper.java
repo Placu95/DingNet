@@ -2,6 +2,7 @@ package util;
 
 import util.time.DoubleTime;
 import util.time.Time;
+import util.time.TimeUnit;
 
 public class TimeHelper {
     public static double nanoToMili(double nanoTime) {
@@ -22,5 +23,9 @@ public class TimeHelper {
 
     public static Time roundToMilli(Time time) {
         return new DoubleTime(Math.round(time.asMilli()));
+    }
+
+    public static Time ceilToMilli(Time time) {
+        return new DoubleTime(Math.ceil(time.asMilli()), TimeUnit.MILLIS);
     }
 }

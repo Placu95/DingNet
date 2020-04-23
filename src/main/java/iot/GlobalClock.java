@@ -62,7 +62,7 @@ public class GlobalClock {
 
     public long addTrigger(Time time, Supplier<Time> trigger) {
         var trig = new Trigger(trigger);
-        addTrigger(TimeHelper.roundToMilli(time), trig);
+        addTrigger(TimeHelper.ceilToMilli(time), trig);
         return trig.getUid();
     }
 
