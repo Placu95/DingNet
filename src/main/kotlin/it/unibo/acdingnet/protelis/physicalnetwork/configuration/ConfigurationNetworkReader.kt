@@ -38,11 +38,11 @@ data class ConfigurationNetwork(
         private val dcc by required<Double>()
         private val dec by required<Double>()
         private val dsc by required<Double>()
-        private val dLocalhost by required<Double>()
+        private val dlocalhost by required<Double>()
 
         fun read(config: Config) = ConfigurationNetwork(config[seed],
             config[gamma], config[beta], toTime(config[dee]), toTime(config[dcc]),
-            toTime(config[dec]), toTime(config[dsc]), toTime(config[dLocalhost])
+            toTime(config[dec]), toTime(config[dsc]), toTime(config[dlocalhost])
         )
 
         private fun toTime(t: Double) = DoubleTime(t, TimeUnit.MILLIS)
