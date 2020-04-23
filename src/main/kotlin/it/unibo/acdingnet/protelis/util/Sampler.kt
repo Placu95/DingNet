@@ -11,7 +11,7 @@ import util.time.TimeUnit
 data class Sampler(
     private val physicalNetwork: PhysicalNetwork,
     private val clock: GlobalClock,
-    private val samplingTime: Long
+    private val samplingTime: Time
 ) {
     private val _samplings: MutableList<Sampling> = mutableListOf(Sampling.zero())
 
@@ -23,9 +23,7 @@ data class Sampler(
 
     fun start() {
         // add trigger for sampling
-        clock.addPeriodicTrigger(
-            DoubleTime(samplingTime.toDouble(), TimeUnit.SECONDS),
-            samplingTime) {
+        clock.addPeriodicTrigger(samplingTime, samplingTime) {
             val lastSample = _samplings.last()
             val runs = physicalNetwork
                 .hosts

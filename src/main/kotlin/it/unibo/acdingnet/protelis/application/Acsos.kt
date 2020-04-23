@@ -145,7 +145,8 @@ class Acsos(
             physicalNetwork.addDeviceTo(id, HostType.EDGE)
         }
 
-        sampler = Sampler(physicalNetwork, timer, 900).also { it.start() }
+        sampler = Sampler(physicalNetwork, timer, DoubleTime(15.0, TimeUnit.MINUTES)).also {
+            it.start() }
     }
 
     private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
