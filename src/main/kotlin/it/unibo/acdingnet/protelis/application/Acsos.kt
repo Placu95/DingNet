@@ -1,5 +1,6 @@
 package it.unibo.acdingnet.protelis.application
 
+import Simulator
 import iot.GlobalClock
 import iot.SimulationRunner
 import iot.mqtt.TransmissionWrapper
@@ -34,14 +35,20 @@ import java.util.*
 class Acsos(
     motes: List<Mote>,
     timer: GlobalClock,
-    protelisProgram: String = "protelis:homeHeating_timer_v2"
+    protelisProgram: String = "protelis:homeHeating_timer"
 ) :
     ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
+
+    companion object {
+        private const val DEFAULT_NETWORK_CONFIG =
+            "/config/physicalnetwork/defaultNetworkConfig.toml"
+    }
 
     private val neigh: NeighborhoodManager
     private val loraNodes: List<SensorNodeWrapper>
     private val otherNodes: List<GenericNode>
-    private val configuration = Configuration("/config/physicalnetwork/defaultNetworkConfig.toml")
+    private val configuration = Configuration(
+        Simulator.getNetworkConfigFilePath().orElse(DEFAULT_NETWORK_CONFIG))
     private val physicalNetwork: PhysicalNetwork =
         PhysicalNetwork(configuration, timer)
     private val random = Random(configuration.configurationNetwork.seed)

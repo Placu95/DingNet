@@ -6,6 +6,7 @@ import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import util.time.DoubleTime
 import util.time.Time
 import util.time.TimeUnit
+import java.io.File
 
 data class ConfigurationNetwork(
     val seed: Long,
@@ -75,11 +76,13 @@ class Configuration(path: String) {
     val hostsConfig: List<HostConfig>
 
     init {
+        val inputStream = Configuration::class.java.getResourceAsStream(path)
+            ?: File(path).inputStream()
         val config = Config {
             addSpec(ConfigurationNetwork)
             addSpec(BrokerHostConfig)
             addSpec(HostConfig)
-        }.from().toml.inputStream(Configuration::class.java.getResourceAsStream(path))
+        }.from().toml.inputStream(inputStream)
 
         configurationNetwork = ConfigurationNetwork.read(config)
         brokerHostConfig = config[BrokerHostConfig.brokerHostConfig]
