@@ -84,7 +84,7 @@ val batch by tasks.register<DefaultTask>("batch") {
     val configDir = File(projectDir, ".temp")
 
     dependsOn("build")
-    dependsOn(createConifgFile)
+    dependsOn(createConfigFile)
     doLast {
         configDir.listFiles()
             .filter { it.extension == "toml" }
@@ -105,7 +105,7 @@ val batch by tasks.register<DefaultTask>("batch") {
     }
 }
 
-val createConifgFile by tasks.register<JavaExec>("createConifgFile") {
+val createConfigFile by tasks.register<JavaExec>("createConfigFile") {
     dependsOn("build")
 
     val configFile: String by project
