@@ -1,6 +1,7 @@
 package it.unibo.acdingnet.protelis.mqtt
 
 import com.google.gson.GsonBuilder
+import com.google.gson.JsonDeserializer
 import com.google.gson.JsonSerializer
 import iot.GlobalClock
 import iot.mqtt.TransmissionWrapper
@@ -49,6 +50,13 @@ class MqttMockCastWithDelay(
         serializer: JsonSerializer<T>
     ): MqttClientBasicApi {
         gson = gson.newBuilder().registerTypeAdapter(clazz, serializer).create()
+        return this
+    }
+
+    override fun <T> addDeserializer(
+        clazz: Class<T>,
+        deserializer: JsonDeserializer<T>
+    ): MqttClientBasicApi {
         return this
     }
 }
