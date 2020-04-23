@@ -77,41 +77,43 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val batch by tasks.register<JavaExec>("batch") {
-    val envFile: String = System.getProperty("user.home") + "\\.DingNet\\config\\simulation\\placuzzi_demo_thesis.xml"
+val batch by tasks.register<DefaultTask>("batch") {
+    val envFile: String = System.getProperty("user.home") +
+        "\\.DingNet\\config\\simulation\\placuzzi_demo_thesis.xml"
     val outputDir: String by project
     val configDir = File(projectDir, ".temp")
 
     dependsOn("build")
     dependsOn(createConifgFile)
-    configDir.listFiles()
-        ?.filter { it.extension == "toml" }
-        ?.forEach {
-/*
-            val task by tasks.register<JavaExec>("run${it.nameWithoutExtension}") {
-                group = dingNetGroup
-                description = "Launches simulation ${it.nameWithoutExtension}"
-                main = "Simulator"
-                classpath = sourceSets["main"].runtimeClasspath
-                args(
-                    "-cf", envFile,
-                    "-nf", it,
-                    "-of", outputDir
-                )
+    doLast {
+        configDir.listFiles()
+            .filter { it.extension == "toml" }
+            .forEach {
+                tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
+                    group = dingNetGroup
+                    description = "Launches simulation ${it.nameWithoutExtension}"
+                    main = "Simulator"
+                    classpath = sourceSets["main"].runtimeClasspath
+                    args(
+                        "-cf", envFile,
+                        "-nf", it,
+                        "-of", outputDir
+                    )
+                }.exec()
             }
-            dependsOn(task)
-*/
-        }
-    // doLast { configDir.deleteRecursively() }
+        configDir.deleteRecursively()
+    }
 }
 
 val createConifgFile by tasks.register<JavaExec>("createConifgFile") {
+    dependsOn("build")
+    
     val configFile: String by project
     val configDir = File(projectDir, ".temp")
 
     if (!configDir.exists() || !configDir.isDirectory) {
         configDir.mkdir()
-    }
+    }    
     main = "it.unibo.gradle.CartesianProduct"
     args(configDir.absolutePath, configFile)
     classpath = sourceSets["main"].runtimeClasspath
