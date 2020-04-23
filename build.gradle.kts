@@ -10,7 +10,9 @@ plugins {
         Versions.org_jlleitschuh_gradle_ktlint_gradle_plugin
 }
 
-group = "KULeuven"
+val dingNetGroup = "KULeuven"
+
+group = dingNetGroup
 version = "1.2.1"
 
 repositories {
@@ -36,6 +38,8 @@ dependencies {
     implementation(Libs.simplelatlng)
     implementation(Libs.commons_lang3)
     implementation(Libs.jpx)
+    // batch
+    implementation("com.google.guava:guava:28.2-jre")
     // dependencies for test
     testImplementation(Libs.junit_jupiter)
     testImplementation(Libs.kotlintest_runner_junit5)
@@ -71,4 +75,44 @@ tasks {
 
 java {
     sourceCompatibility = JavaVersion.VERSION_11
+}
+
+val batch by tasks.register<JavaExec>("batch") {
+    val envFile: String = System.getProperty("user.home") + "\\.DingNet\\config\\simulation\\placuzzi_demo_thesis.xml"
+    val outputDir: String by project
+    val configDir = File(projectDir, ".temp")
+
+    dependsOn("build")
+    dependsOn(createConifgFile)
+    configDir.listFiles()
+        ?.filter { it.extension == "toml" }
+        ?.forEach {
+/*
+            val task by tasks.register<JavaExec>("run${it.nameWithoutExtension}") {
+                group = dingNetGroup
+                description = "Launches simulation ${it.nameWithoutExtension}"
+                main = "Simulator"
+                classpath = sourceSets["main"].runtimeClasspath
+                args(
+                    "-cf", envFile,
+                    "-nf", it,
+                    "-of", outputDir
+                )
+            }
+            dependsOn(task)
+*/
+        }
+    // doLast { configDir.deleteRecursively() }
+}
+
+val createConifgFile by tasks.register<JavaExec>("createConifgFile") {
+    val configFile: String by project
+    val configDir = File(projectDir, ".temp")
+
+    if (!configDir.exists() || !configDir.isDirectory) {
+        configDir.mkdir()
+    }
+    main = "it.unibo.gradle.CartesianProduct"
+    args(configDir.absolutePath, configFile)
+    classpath = sourceSets["main"].runtimeClasspath
 }
