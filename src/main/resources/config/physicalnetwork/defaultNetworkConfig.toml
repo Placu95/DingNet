@@ -8,7 +8,7 @@ dee = 1
 dcc = 2
 dec = 5
 dsc = 10
-dLocalhost = 0.015
+dlocalhost = 0.015
 
 [brokerHostConfig]
 type = "CLOUD"
