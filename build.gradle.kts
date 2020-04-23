@@ -88,6 +88,7 @@ val batch by tasks.register<DefaultTask>("batch") {
     doLast {
         configDir.listFiles()
             .filter { it.extension == "toml" }
+            .parallelStream()
             .forEach {
                 tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
                     group = dingNetGroup
