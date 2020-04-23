@@ -171,7 +171,8 @@ class Acsos(
     override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) {}
 
     override fun storeSimulationResults(pathDir: String) {
-        val parameter = configuration.configurationNetwork.print()
+        val parameter = configuration.configurationNetwork.print() +
+            ", hostBroker = ${configuration.brokerHostConfig.type}"
         val timeUnit = TimeUnit.SECONDS
         val output =
             """
@@ -181,11 +182,11 @@ class Acsos(
                 # ${Sampling.header(timeUnit)}
             """.trimIndent()
                 .plus("\n")
-                .plus(samplings.map { it.print(timeUnit) }.reduce{ s1, s2 -> s1 + "\n" + s2 })
+                .plus(samplings.map { it.print(timeUnit) }.reduce { s1, s2 -> s1 + "\n" + s2 })
         val fileName = "sim_" +
-                parameter.replace(" = ","-").replace(", ", "_") +
+                parameter.replace(" = ", "-").replace(", ", "_") +
                 ".txt"
-         val file = File(pathDir, fileName)
+        val file = File(pathDir, fileName)
         file.printWriter().use { it.println(output) }
     }
 }
