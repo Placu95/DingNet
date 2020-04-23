@@ -105,13 +105,13 @@ val batch by tasks.register<DefaultTask>("batch") {
                     )
                 }
             }
-            .map { 
+            .map {
                 object : RecursiveTask<Int>() {
                     override fun compute(): Int {
                         it.exec()
                         return 1
                     }
-                } 
+                }
             }
         jobs.forEach { forkJoinPool.execute(it) }
         jobs.forEach { it.join() }
