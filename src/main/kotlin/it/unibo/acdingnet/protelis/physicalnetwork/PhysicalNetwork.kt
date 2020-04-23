@@ -15,7 +15,8 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
     private val hostBroker: Host
     private var receivingQueueFreeFrom: Time = DoubleTime.zero()
     private var sendingQueueFreeFrom: Time = DoubleTime.zero()
-    private var hosts: Set<Host>
+    var hosts: Set<Host>
+    private set
     private val configurationNetwork = configuration.configurationNetwork
 
     init {

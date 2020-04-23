@@ -16,18 +16,14 @@ import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
 import it.unibo.acdingnet.protelis.neighborhood.Node
 import it.unibo.acdingnet.protelis.node.GenericNode
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
-import it.unibo.acdingnet.protelis.physicalnetwork.NetworkStatistic
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
 import it.unibo.acdingnet.protelis.util.*
-import it.unibo.acdingnet.protelis.util.Utils.maxTime
-import it.unibo.acdingnet.protelis.util.Utils.roundToDecimal
 import org.jxmapviewer.JXMapViewer
 import org.jxmapviewer.painter.Painter
 import org.protelis.lang.ProtelisLoader
 import org.protelis.lang.datatype.impl.StringUID
 import util.time.DoubleTime
-import util.time.Time
 import util.time.TimeUnit
 import java.io.File
 import java.util.*
@@ -35,7 +31,7 @@ import java.util.*
 class Acsos(
     motes: List<Mote>,
     timer: GlobalClock,
-    protelisProgram: String = "protelis:homeHeating_timer_v2"
+    protelisProgram: String = "protelis:homeHeating_timer"
 ) :
     ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
@@ -52,7 +48,7 @@ class Acsos(
     private val physicalNetwork: PhysicalNetwork =
         PhysicalNetwork(configuration, timer)
     private val random = Random(configuration.configurationNetwork.seed)
-    private val samplings: MutableList<Sampling> = mutableListOf()
+    private val sampler: Sampler
 
     init {
         // access point to simulation runner (it is shit, but it is the fastest way)
@@ -149,23 +145,7 @@ class Acsos(
             physicalNetwork.addDeviceTo(id, HostType.EDGE)
         }
 
-        // add trigger for sampling
-        samplings.add(Sampling(DoubleTime.zero(), 0, DoubleTime.zero(),
-                DoubleTime.zero(), 0, DoubleTime.zero(), DoubleTime.zero()))
-        timer.addPeriodicTrigger(DoubleTime(15.0, TimeUnit.MINUTES), 900) {
-            val lastSample = samplings.last()
-            val newSampling = Sampling(
-                timer.time,
-                NetworkStatistic.count,
-                NetworkStatistic.delayToT,
-                NetworkStatistic.delayMax,
-                lastSample.delayCountTot + NetworkStatistic.count,
-                lastSample.delaySumTot + NetworkStatistic.delayToT,
-                maxTime(lastSample.delayMaxTot, NetworkStatistic.delayMax)
-            )
-            NetworkStatistic.reset()
-            samplings.add(newSampling)
-        }
+        sampler = Sampler(physicalNetwork, timer, 900).also { it.start() }
     }
 
     private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
@@ -179,44 +159,33 @@ class Acsos(
     override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) {}
 
     override fun storeSimulationResults(pathDir: String) {
+        val hosts = physicalNetwork.hosts
+            .groupBy { it.type }
+            .map { it.key to it.value.size }
+            .toMap()
         val parameter = configuration.configurationNetwork.print() +
-            ", hostBroker = ${configuration.brokerHostConfig.type}"
+            ", hostBroker = ${configuration.brokerHostConfig.type}" +
+            ", numOfCloud = ${(hosts[HostType.CLOUD] ?: 0)}" +
+            ", numOfEdge = ${(hosts[HostType.EDGE] ?: 0)}" +
+            ", numOfSmartphone = ${(hosts[HostType.SMARTPHONE] ?: 0)}"
         val timeUnit = TimeUnit.SECONDS
         val output =
             """
                 # $parameter 
                 #
                 # The columns have the following meaning: 
-                # ${Sampling.header(timeUnit)}
+                # ${Sampler.header(timeUnit)}
             """.trimIndent()
                 .plus("\n")
-                .plus(samplings.map { it.print(timeUnit) }.reduce { s1, s2 -> s1 + "\n" + s2 })
+                .plus(
+                    sampler.getSamplings()
+                        .map { it.print(timeUnit) }
+                        .reduce { s1, s2 -> s1 + "\n" + s2 }
+                )
         val fileName = "sim_" +
                 parameter.replace(" = ", "-").replace(", ", "_") +
                 ".txt"
         val file = File(pathDir, fileName)
         file.printWriter().use { it.println(output) }
-    }
-}
-
-data class Sampling(
-    val instant: Time,
-    val delayCountPartial: Int,
-    val delaySumPartial: Time,
-    val delayMaxPartial: Time,
-    val delayCountTot: Int,
-    val delaySumTot: Time,
-    val delayMaxTot: Time
-) {
-    fun print(tU: TimeUnit) = "${printTime(instant, tU)} $delayCountPartial " +
-        "${printTime(delaySumPartial, tU)} ${printTime(delayMaxPartial, tU)} $delayCountTot " +
-        "${printTime(delaySumTot, tU)} ${printTime(delayMaxTot, tU)}"
-
-    private fun printTime(t: Time, tU: TimeUnit) = roundToDecimal(t.getAs(tU), 2).toString()
-
-    companion object {
-        fun header(timeUnit: TimeUnit) = "instant[${timeUnit.name}] delayCountPartial[Sum] " +
-            "delaySumPartial[${timeUnit.name}] delayMaxPartial[${timeUnit.name}] " +
-            "delayCountTot[Sum] delaySumTot[${timeUnit.name}] delayMaxTot[${timeUnit.name}]"
     }
 }
