@@ -82,8 +82,9 @@ java {
 }
 
 val batch by tasks.register<DefaultTask>("batch") {
+    val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
-        "\\.DingNet\\config\\simulation\\acsos2020.xml"
+        "${separator}.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
     val outputDir: String by project
     val configDir = File(projectDir, ".temp")
 
