@@ -1,5 +1,6 @@
 package it.unibo.acdingnet.protelis.mqtt
 
+import flexjson.JSONSerializer
 import iot.GlobalClock
 import iot.mqtt.TransmissionWrapper
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
@@ -11,6 +12,8 @@ class MqttMockSerWithDelay(
     private val clock: GlobalClock,
     private val deviceUID: DeviceUID
 ) : MqttMockSer() {
+
+    private val jsonSerializer = JSONSerializer()
 
     override fun publish(topic: String, message: Any) {
         clock.addTriggerOneShot(
@@ -31,7 +34,7 @@ class MqttMockSerWithDelay(
         }
     }
 
-    private fun <E> computeLength(message: E) = gson.toJson(
+    private fun <E> computeLength(message: E) = jsonSerializer.deepSerialize(
         when (message) {
             is LoRaTransmissionWrapper -> message.transmission.content
             is TransmissionWrapper -> message.transmission.content

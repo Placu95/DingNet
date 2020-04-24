@@ -1,8 +1,8 @@
 package it.unibo.acdingnet.protelis.mqtt
 
-import com.google.gson.GsonBuilder
 import com.google.gson.JsonDeserializer
 import com.google.gson.JsonSerializer
+import flexjson.JSONSerializer
 import iot.GlobalClock
 import iot.mqtt.TransmissionWrapper
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
@@ -16,7 +16,7 @@ class MqttMockCastWithDelay(
     private val deviceUID: DeviceUID
 ) : MqttMockCast() {
 
-    private var gson = GsonBuilder().create()
+    private val jsonSerializer = JSONSerializer()
 
     override fun publish(topic: String, message: Any) {
         clock.addTriggerOneShot(
@@ -37,7 +37,7 @@ class MqttMockCastWithDelay(
         }
     }
 
-    private fun <E> computeLength(message: E) = gson.toJson(
+    private fun <E> computeLength(message: E) = jsonSerializer.deepSerialize(
         when (message) {
             is LoRaTransmissionWrapper -> message.transmission.content
             is TransmissionWrapper -> message.transmission.content
@@ -45,11 +45,11 @@ class MqttMockCastWithDelay(
         }
     ).length * Char.SIZE_BITS
 
+    // override both the following method to avoid print "this method don't do nothing
     override fun <T> addSerializer(
         clazz: Class<T>,
         serializer: JsonSerializer<T>
     ): MqttClientBasicApi {
-        gson = gson.newBuilder().registerTypeAdapter(clazz, serializer).create()
         return this
     }
 

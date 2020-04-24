@@ -41,6 +41,7 @@ dependencies {
     implementation(Libs.simplelatlng)
     implementation(Libs.commons_lang3)
     implementation(Libs.jpx)
+    implementation("net.sf.flexjson:flexjson:3.3")
     // batch
     implementation("com.google.guava:guava:28.2-jre")
     // dependencies for test
