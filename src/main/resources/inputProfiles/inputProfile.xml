@@ -3,7 +3,7 @@
     <inputProfile>
         <name>ReliableEfficient</name>
         <numberOfRuns>10</numberOfRuns>
-        <simulationDuration>120</simulationDuration>
+        <simulationDuration>96</simulationDuration>
         <timeUnit>Hours</timeUnit>
         <protelisApp>
             <protelisProgram>Acsos</protelisProgram>
