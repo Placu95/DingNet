@@ -81,6 +81,10 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
+val numOfCore by tasks.register<DefaultTask>("numOfCore") {
+    println(Runtime.getRuntime().availableProcessors())
+}
+
 val batch by tasks.register<DefaultTask>("batch") {
     val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
