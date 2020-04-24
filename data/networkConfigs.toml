@@ -1,9 +1,9 @@
 [configurationNetwork]
-seed = [1, 2]
+seed = [1]
 # probability of LoRa device on edge
-gamma = [0.4]
+gamma = [1]
 # probability of device on smartphone
-beta = [0.4]
+beta = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
 dee = [1]
 dcc = [2]
 dec = [5]
