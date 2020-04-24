@@ -116,7 +116,11 @@ val batch by tasks.register<DefaultTask>("batch") {
                 }
             }
         jobs.forEach { forkJoinPool.execute(it) }
-        jobs.forEach { it.join() }
+        var finishedJobs = 0
+        jobs.forEach {
+            it.join()
+            println("simulation finisched: ${++finishedJobs}/${jobs.size}")
+        }
         configDir.deleteRecursively()
     }
 }
