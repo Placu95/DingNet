@@ -107,7 +107,7 @@ val batchThread by tasks.register<DefaultTask>("batchThread") {
             val jobs = (0 until numOfJobs)
                 .map { files.removeAt(0) }
                 .map {
-                    "java -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
+                    "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
                 }.map {
                     object : Thread() {
                         val future: CompletableFuture<Int> = CompletableFuture()
@@ -147,7 +147,7 @@ val batchExecutor by tasks.register<DefaultTask>("batchExecutor") {
             val jobs = (0 until numOfJobs)
                 .map { files.removeAt(0) }
                 .map {
-                    "java -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
+                    "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
                 }.map {
                     object : RecursiveTask<Int>() {
                         override fun compute(): Int {
