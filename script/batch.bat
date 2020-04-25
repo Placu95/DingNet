@@ -1,2 +1,2 @@
 cd ..
-gradlew batch -PoutputDir=".\data" -PconfigFile=".\data\networkConfigs.toml"
+gradlew --parallel batch -PoutputDir=".\data" -PconfigFile=".\data\networkConfigs.toml"
