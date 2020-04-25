@@ -1,3 +1,6 @@
+import java.util.concurrent.ForkJoinPool
+import java.util.concurrent.RecursiveTask
+
 plugins {
     id("de.fayard.buildSrcVersions") version Versions.de_fayard_buildsrcversions_gradle_plugin
     application
@@ -82,32 +85,47 @@ val numOfCore by tasks.register<DefaultTask>("numOfCore") {
     println(Runtime.getRuntime().availableProcessors())
 }
 
+val configDir = File(projectDir, ".temp")
 val batch by tasks.register<DefaultTask>("batch") {
     val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
         "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
     val outputDir: String by project
-    val configDir = File(projectDir, ".temp")
 
     dependsOn("build")
     dependsOn(createConfigFile)
     doLast {
-        configDir.listFiles()
-            .filter { it.extension == "toml" }
-            .forEach {
-                tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
-                    group = dingNetGroup
-                    description = "Launches simulation ${it.nameWithoutExtension}"
-                    main = "Simulator"
-                    classpath = sourceSets["main"].runtimeClasspath
-                    jvmArgs("-Xmx1500m")
-                    args(
-                        "-cf", envFile,
-                        "-nf", it,
-                        "-of", outputDir
-                    )
-                }.exec()
-            }
+        val numCores = Runtime.getRuntime().availableProcessors()
+        val forkJoinPool = ForkJoinPool(numCores)
+        val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
+        while (files.isNotEmpty()) {
+            val numOfJobs = if (files.size > numCores) numCores else files.size
+            val jobs = (0 until numOfJobs)
+                .map { files.removeAt(0) }
+                .map {
+                    tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
+                        group = dingNetGroup
+                        description = "Launches simulation ${it.nameWithoutExtension}"
+                        main = "Simulator"
+                        classpath = sourceSets["main"].runtimeClasspath
+                        jvmArgs("-Xmx1500m")
+                        args(
+                            "-cf", envFile,
+                            "-nf", it,
+                            "-of", outputDir
+                        )
+                    }
+                }.map {
+                    object : RecursiveTask<Int>() {
+                        override fun compute(): Int {
+                            it.exec()
+                            return 1
+                        }
+                    }
+                }
+            jobs.forEach { forkJoinPool.execute(it) }
+            jobs.forEach { it.join() }
+        }
     }
 }
 
@@ -115,7 +133,6 @@ val createConfigFile by tasks.register<JavaExec>("createConfigFile") {
     dependsOn("build")
 
     val configFile: String by project
-    val configDir = File(projectDir, ".temp")
 
     if (!configDir.exists() || !configDir.isDirectory) {
         configDir.mkdir()
