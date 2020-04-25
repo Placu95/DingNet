@@ -1,6 +1,3 @@
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.RecursiveTask
-
 plugins {
     id("de.fayard.buildSrcVersions") version Versions.de_fayard_buildsrcversions_gradle_plugin
     application
@@ -95,37 +92,22 @@ val batch by tasks.register<DefaultTask>("batch") {
     dependsOn("build")
     dependsOn(createConfigFile)
     doLast {
-        val forkJoinPool = ForkJoinPool(Runtime.getRuntime().availableProcessors())
-        val jobs = configDir.listFiles()
+        configDir.listFiles()
             .filter { it.extension == "toml" }
-            .map {
+            .forEach {
                 tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
                     group = dingNetGroup
                     description = "Launches simulation ${it.nameWithoutExtension}"
                     main = "Simulator"
                     classpath = sourceSets["main"].runtimeClasspath
+                    jvmArgs("-Xmx1500m")
                     args(
                         "-cf", envFile,
                         "-nf", it,
                         "-of", outputDir
                     )
-                }
+                }.exec()
             }
-            .map {
-                object : RecursiveTask<Int>() {
-                    override fun compute(): Int {
-                        it.exec()
-                        return 1
-                    }
-                }
-            }
-        jobs.forEach { forkJoinPool.execute(it) }
-        var finishedJobs = 0
-        jobs.forEach {
-            it.join()
-            println("simulation finisched: ${++finishedJobs}/${jobs.size}")
-        }
-        configDir.deleteRecursively()
     }
 }
 
