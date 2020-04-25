@@ -1,3 +1,4 @@
+import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.RecursiveTask
 
@@ -86,7 +87,7 @@ val numOfCore by tasks.register<DefaultTask>("numOfCore") {
 }
 
 val configDir = File(projectDir, ".temp")
-val batch by tasks.register<DefaultTask>("batch") {
+val batchThread by tasks.register<DefaultTask>("batchThread") {
     val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
         "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
@@ -94,31 +95,63 @@ val batch by tasks.register<DefaultTask>("batch") {
 
     dependsOn("build")
     dependsOn(createConfigFile)
+    dependsOn(jar)
     doLast {
-        val numCores = Runtime.getRuntime().availableProcessors()
-        val forkJoinPool = ForkJoinPool(numCores)
+        val runtime = Runtime.getRuntime()
+        val numCores = runtime.availableProcessors() / 2
         val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
+        val classpath = "${project.buildDir.absolutePath}" +
+            "${separator}libs${separator}$classpathJarName"
         while (files.isNotEmpty()) {
             val numOfJobs = if (files.size > numCores) numCores else files.size
             val jobs = (0 until numOfJobs)
                 .map { files.removeAt(0) }
                 .map {
-                    tasks.create<JavaExec>("run${it.nameWithoutExtension}") {
-                        group = dingNetGroup
-                        description = "Launches simulation ${it.nameWithoutExtension}"
-                        main = "Simulator"
-                        classpath = sourceSets["main"].runtimeClasspath
-                        jvmArgs("-Xmx1500m")
-                        args(
-                            "-cf", envFile,
-                            "-nf", it,
-                            "-of", outputDir
-                        )
+                    "java -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
+                }.map {
+                    object : Thread() {
+                        val future: CompletableFuture<Int> = CompletableFuture()
+                        override fun run() {
+                            runtime.exec(it).onExit().get()
+                            future.complete(0)
+                        }
                     }
+                }.map {
+                    Pair(it, it.future)
+                }
+            jobs.forEach { it.first.start() }
+            jobs.forEach { it.second.get() }
+//            jobs.forEach { it.get() }
+        }
+    }
+}
+
+val batchExecutor by tasks.register<DefaultTask>("batchExecutor") {
+    val separator = System.getProperty("file.separator")
+    val envFile: String = System.getProperty("user.home") +
+        "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
+    val outputDir: String by project
+
+    dependsOn("build")
+    dependsOn(createConfigFile)
+    dependsOn(jar)
+    doLast {
+        val runtime = Runtime.getRuntime()
+        val numCores = runtime.availableProcessors() / 2
+        val forkJoinPool = ForkJoinPool(numCores)
+        val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
+        val classpath = "${project.buildDir.absolutePath}" +
+            "${separator}libs${separator}$classpathJarName"
+        while (files.isNotEmpty()) {
+            val numOfJobs = if (files.size > numCores) numCores else files.size
+            val jobs = (0 until numOfJobs)
+                .map { files.removeAt(0) }
+                .map {
+                    "java -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
                 }.map {
                     object : RecursiveTask<Int>() {
                         override fun compute(): Int {
-                            it.exec()
+                            runtime.exec(it).onExit().get()
                             return 1
                         }
                     }
@@ -126,6 +159,16 @@ val batch by tasks.register<DefaultTask>("batch") {
             jobs.forEach { forkJoinPool.execute(it) }
             jobs.forEach { it.join() }
         }
+    }
+}
+
+val classpathJarName = "classpath.jar"
+val jar by tasks.getting(Jar::class) {
+    archiveName = classpathJarName
+    manifest {
+        attributes["Class-Path"] = files(configurations.runtimeClasspath)
+            .map { it.toURI() }
+            .joinToString(" ")
     }
 }
 
