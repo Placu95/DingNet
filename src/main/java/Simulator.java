@@ -76,7 +76,8 @@ public class Simulator {
             var sec = new MutableInteger(5);
             simulationRunner.simulate(
                 sec,
-                new BatchSimulationUpdater(sec, cmd.getOptionValue("outputFile"))
+                new BatchSimulationUpdater(sec, cmd.getOptionValue("outputFile")),
+                false
             );
         } else {
             MainGUI.startGUI(simulationRunner);

@@ -226,21 +226,31 @@ public class SimulationRunner {
      * @param listener The listener which receives the callbacks every x simulation steps.
      */
     public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener) {
-        new Thread(() -> {
-            long simulationStep = 0;
-            while (!this.isSimulationFinished()) {
-                this.simulation.simulateStep();
+        simulate(updateFrequency, listener, true);
+    }
 
-                // Visualize every x seconds
-                if (simulationStep++ % (updateFrequency.intValue() * 1000) == 0) {
-                    listener.update();
-                }
+    public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener, boolean withGUI) {
+        if (withGUI) {
+            new Thread(() -> doSimulation(updateFrequency, listener)).start();
+        } else {
+            doSimulation(updateFrequency, listener);
+        }
+    }
+
+    private void doSimulation(MutableInteger updateFrequency, SimulationUpdateListener listener) {
+        long simulationStep = 0;
+        while (!this.isSimulationFinished()) {
+            this.simulation.simulateStep();
+
+            // Visualize every x seconds
+            if (simulationStep++ % (updateFrequency.intValue() * 1000) == 0) {
+                listener.update();
             }
+        }
 
-            // Restore the initial positions after the run
-            listener.update();
-            listener.onEnd();
-        }).start();
+        // Restore the initial positions after the run
+        listener.update();
+        listener.onEnd();
     }
 
 
