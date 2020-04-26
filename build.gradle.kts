@@ -1,6 +1,7 @@
 import java.util.concurrent.CompletableFuture
 import java.util.concurrent.ForkJoinPool
 import java.util.concurrent.RecursiveTask
+import kotlin.math.min
 
 plugins {
     id("de.fayard.buildSrcVersions") version Versions.de_fayard_buildsrcversions_gradle_plugin
@@ -103,19 +104,13 @@ val batchThread by tasks.register<DefaultTask>("batchThread") {
         val classpath = "${project.buildDir.absolutePath}" +
             "${separator}libs${separator}$classpathJarName"
         while (files.isNotEmpty()) {
-            val numOfJobs = if (files.size > numCores) numCores else files.size
+            val numOfJobs = min(files.size, numCores)
             val jobs = (0 until numOfJobs)
                 .map { files.removeAt(0) }
                 .map {
                     "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
                 }.map {
-                    object : Thread() {
-                        val future: CompletableFuture<Int> = CompletableFuture()
-                        override fun run() {
-                            runtime.exec(it).onExit().get()
-                            future.complete(0)
-                        }
-                    }
+                    JobThread(runtime, it)
                 }.map {
                     Pair(it, it.future)
                 }
@@ -123,6 +118,14 @@ val batchThread by tasks.register<DefaultTask>("batchThread") {
             jobs.forEach { it.second.get() }
 //            jobs.forEach { it.get() }
         }
+    }
+}
+
+class JobThread(private val runtime: Runtime, private val cmd: String) : Thread() {
+    val future: CompletableFuture<Int> = CompletableFuture()
+    override fun run() {
+        runtime.exec(cmd).onExit().get()
+        future.complete(0)
     }
 }
 
@@ -143,22 +146,24 @@ val batchExecutor by tasks.register<DefaultTask>("batchExecutor") {
         val classpath = "${project.buildDir.absolutePath}" +
             "${separator}libs${separator}$classpathJarName"
         while (files.isNotEmpty()) {
-            val numOfJobs = if (files.size > numCores) numCores else files.size
+            val numOfJobs = min(files.size, numCores)
             val jobs = (0 until numOfJobs)
                 .map { files.removeAt(0) }
                 .map {
                     "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
                 }.map {
-                    object : RecursiveTask<Int>() {
-                        override fun compute(): Int {
-                            runtime.exec(it).onExit().get()
-                            return 1
-                        }
-                    }
+                    JobExec(runtime, it)
                 }
             jobs.forEach { forkJoinPool.execute(it) }
             jobs.forEach { it.join() }
         }
+    }
+}
+
+class JobExec(private val runtime: Runtime, private val cmd: String) : RecursiveTask<Int>() {
+    override fun compute(): Int {
+        runtime.exec(cmd).onExit().get()
+        return 1
     }
 }
 
