@@ -190,3 +190,70 @@ val createConfigFile by tasks.register<JavaExec>("createConfigFile") {
     args(configDir.absolutePath, configFile)
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+class JobThread2(
+    private val runtime: Runtime,
+    private val listOfFiles: ListOfFiles,
+    private val classpath: String,
+    private val envFile: String,
+    private val outputDir: String
+) : Thread() {
+    val future: CompletableFuture<Int> = CompletableFuture()
+    private var stop = false
+    override fun run() {
+        while (!stop) {
+            val file = listOfFiles.getNextFile()
+            if (file == null) {
+                stop = true
+            } else {
+                runtime.exec(getCmd(file)).onExit().get()
+            }
+        }
+        future.complete(0)
+    }
+    private fun getCmd(file: String) =
+        "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $file -of $outputDir"
+}
+
+class ListOfFiles(list: List<String>) {
+    private val files = list.toMutableList()
+    fun getNextFile(): String? {
+        synchronized(this) {
+            return if (files.isNotEmpty()) {
+                println(files.size)
+                files.removeAt(0)
+            } else {
+                null
+            }
+        }
+    }
+}
+
+val batchThread2 by tasks.register<DefaultTask>("batchThread2") {
+    val separator = System.getProperty("file.separator")
+    val envFile: String = System.getProperty("user.home") +
+        "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
+    val outputDir: String by project
+
+    dependsOn("build")
+    dependsOn(createConfigFile)
+    dependsOn(jar)
+    doLast {
+        val runtime = Runtime.getRuntime()
+        val numCores = runtime.availableProcessors()
+        val files = ListOfFiles(configDir.listFiles()
+            .filter { it.extension == "toml" }.map { it.absolutePath })
+        val classpath = "${project.buildDir.absolutePath}" +
+            "${separator}libs${separator}$classpathJarName"
+
+        val jobs = (0 until numCores)
+            .map {
+                JobThread2(runtime, files, classpath, envFile, outputDir)
+            }.map {
+                Pair(it, it.future)
+            }
+        jobs.forEach { it.first.start() }
+        jobs.forEach { it.second.get() }
+//            jobs.forEach { it.get() }
+    }
+}
