@@ -181,10 +181,11 @@ val createConfigFile by tasks.register<JavaExec>("createConfigFile") {
     dependsOn("build")
 
     val configFile: String by project
-
-    if (!configDir.exists() || !configDir.isDirectory) {
-        configDir.mkdir()
+    if (configDir.exists() && configDir.isDirectory) {
+        configDir.deleteRecursively()
     }
+    configDir.mkdir()
+
     main = "it.unibo.gradle.CartesianProduct"
     args(configDir.absolutePath, configFile)
     classpath = sourceSets["main"].runtimeClasspath
