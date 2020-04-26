@@ -1,13 +1,13 @@
 [configurationNetwork]
 seed = [1]
 # probability of LoRa device on edge
-gamma = [1.0]
+gamma = [0.0, 0.25, 0.50, 0.75, 1.0]
 # probability of device on smartphone
-beta = [0.0, 1.0]
-dee = [2]
-dcc = [2]
-dec = [2]
-dsc = [2]
+beta = [0.0, 0.25, 0.50, 0.75, 1.0]
+dee = [10]
+dcc = [2, 50]
+dec = [15]
+dsc = [20, 50]
 dlocalhost = 0.015
 
 [brokerHostConfig]
