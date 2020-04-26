@@ -99,7 +99,7 @@ val batchThread by tasks.register<DefaultTask>("batchThread") {
     dependsOn(jar)
     doLast {
         val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors() / 2
+        val numCores = runtime.availableProcessors()
         val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
         val classpath = "${project.buildDir.absolutePath}" +
             "${separator}libs${separator}$classpathJarName"
@@ -140,7 +140,7 @@ val batchExecutor by tasks.register<DefaultTask>("batchExecutor") {
     dependsOn(jar)
     doLast {
         val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors() / 2
+        val numCores = runtime.availableProcessors()
         val forkJoinPool = ForkJoinPool(numCores)
         val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
         val classpath = "${project.buildDir.absolutePath}" +
