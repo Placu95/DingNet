@@ -264,3 +264,10 @@ val searchMissingFiles by tasks.register<JavaExec>("searchMissingFiles") {
     args(configDir.absolutePath, File(projectDir, "data").absolutePath)
     classpath = sourceSets["main"].runtimeClasspath
 }
+
+val refactorResults by tasks.register<JavaExec>("refactorResults") {
+    dependsOn("build")
+    main = "it.unibo.gradle.RefactorResults"
+    args(File(projectDir, "data").absolutePath)
+    classpath = sourceSets["main"].runtimeClasspath
+}
