@@ -1,2 +1,2 @@
 cd ..
-gradlew batchThread --stacktrace -PoutputDir=".\data" -PconfigFile=".\data\networkConfigs.toml"
+gradlew batchThread --stacktrace -PoutputDir=".\data" -PconfigFile=".\sim\networkConfigs.toml"
