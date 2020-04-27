@@ -240,7 +240,7 @@ val batchThread2 by tasks.register<DefaultTask>("batchThread2") {
     dependsOn(jar)
     doLast {
         val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors()
+        val numCores = runtime.availableProcessors() / 2
         val files = ListOfFiles(configDir.listFiles()
             .filter { it.extension == "toml" }.map { it.absolutePath })
         val classpath = "${project.buildDir.absolutePath}" +
@@ -256,4 +256,11 @@ val batchThread2 by tasks.register<DefaultTask>("batchThread2") {
         jobs.forEach { it.second.get() }
 //            jobs.forEach { it.get() }
     }
+}
+
+val searchMissingFiles by tasks.register<JavaExec>("searchMissingFiles") {
+    dependsOn("build")
+    main = "it.unibo.gradle.SearchMissingFiles"
+    args(configDir.absolutePath, File(projectDir, "data").absolutePath)
+    classpath = sourceSets["main"].runtimeClasspath
 }
