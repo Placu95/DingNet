@@ -350,7 +350,7 @@ if __name__ == '__main__':
                 ax.plot(xdata, data-error, label=None, color=last_color, linewidth=errlinewidth)
         return (fig, ax)
     def generate_all_charts(means, errors = None, basedir=''):
-        viable_coords = { coord for coord in means.coords if means[coord].size > 1 }
+        viable_coords = { coord for coord in means.coords if means[coord].size > 0 }
         for comparison_variable in viable_coords - {timeColumnName}:
             mergeable_variables = viable_coords - {timeColumnName, comparison_variable}
             for current_coordinate in mergeable_variables:
