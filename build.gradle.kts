@@ -11,8 +11,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version
         Versions.com_github_johnrengelman_shadow_gradle_plugin
     checkstyle
-    id("org.jlleitschuh.gradle.ktlint") version
-        Versions.org_jlleitschuh_gradle_ktlint_gradle_plugin
+//    id("org.jlleitschuh.gradle.ktlint") version
+//        Versions.org_jlleitschuh_gradle_ktlint_gradle_plugin
 }
 
 val dingNetGroup = "KULeuven"
@@ -37,7 +37,8 @@ dependencies {
     implementation(Libs.gson)
     implementation(Libs.moquette_broker)
     implementation(Libs.konf)
-    implementation(files(Util.downloadLibFromUrl(ExternalLib.mqtt_client_wrapper)))
+//    implementation(files(Util.downloadLibFromUrl(ExternalLib.mqtt_client_wrapper)))
+    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0")
     // dependencies for protelis application
     implementation(Libs.protelis)
     implementation(Libs.simplelatlng)
