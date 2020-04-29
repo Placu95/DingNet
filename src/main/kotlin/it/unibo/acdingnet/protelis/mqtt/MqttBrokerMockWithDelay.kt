@@ -20,8 +20,8 @@ class MqttBrokerMockWithDelay(
     private val jsonSerializer = JSONSerializer()
     private val hostBroker by lazy { physicalNetwork.hostBroker }
 
-    private fun getIncomingQueue() = physicalNetwork.incomingQueue
-    private fun getSendingQueueFreeFrom() = physicalNetwork.sendingQueueFreeFrom
+    private fun getIncomingQueue(): MutableList<IncomingMessage> = physicalNetwork.incomingQueue
+    private fun getSendingQueueFreeFrom(): Time = physicalNetwork.sendingQueueFreeFrom
     private fun setSendingQueueFreeFrom(t: Time) {
         physicalNetwork.sendingQueueFreeFrom = t
     }
