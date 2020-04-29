@@ -1,20 +1,18 @@
 package it.unibo.acdingnet.protelis.physicalnetwork
 
-import iot.GlobalClock
+import it.unibo.acdingnet.protelis.mqtt.IncomingMessage
 import it.unibo.acdingnet.protelis.node.GenericNode
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
-import it.unibo.acdingnet.protelis.util.Utils.maxTime
 import it.unibo.acdingnet.protelis.util.skip
 import org.protelis.lang.datatype.DeviceUID
 import util.time.DoubleTime
 import util.time.Time
-import util.time.TimeUnit
 
-class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClock) {
+class PhysicalNetwork(configuration: Configuration) {
 
-    private val hostBroker: Host
-    private var receivingQueueFreeFrom: Time = DoubleTime.zero()
-    private var sendingQueueFreeFrom: Time = DoubleTime.zero()
+    val hostBroker: Host
+    val incomingQueue: MutableList<IncomingMessage> = mutableListOf()
+    var sendingQueueFreeFrom: Time = DoubleTime.zero()
     var hosts: Set<Host>
     private set
     private val configurationNetwork = configuration.configurationNetwork
@@ -56,22 +54,6 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
 
     private fun hostByType(hostType: HostType) = checkNotNull(hosts.find { it.type == hostType })
 
-    fun arrivalTimeToBroker(deviceUID: DeviceUID, messageLenght: Int): Time {
-        val time = computeArrivalTime(getHostByDevice(deviceUID), hostBroker,
-            receivingQueueFreeFrom, messageLenght)
-        receivingQueueFreeFrom = time
-        NetworkStatistic.addDelay(deviceUID, time - clock.time, NetworkStatistic.Type.UPLOAD)
-        return time
-    }
-
-    fun arrivalTimeToSubscriber(deviceUID: DeviceUID, messageLenght: Int): Time {
-        val time = computeArrivalTime(hostBroker, getHostByDevice(deviceUID),
-            sendingQueueFreeFrom, messageLenght)
-        sendingQueueFreeFrom = time
-        NetworkStatistic.addDelay(deviceUID, time - clock.time, NetworkStatistic.Type.DOWNLOAD)
-        return time
-    }
-
     fun computeDelayPhysicalSmartphoneToProtelisNode(deviceUID: DeviceUID): Time {
         val delay = when (getHostByDevice(deviceUID).type) {
             HostType.SMARTPHONE -> configurationNetwork.dLocalhost
@@ -79,9 +61,12 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
             else -> throw IllegalStateException()
         }
         // type is irrelevant
-        NetworkStatistic.addDelay(deviceUID, delay, NetworkStatistic.Type.DOWNLOAD)
+        NetworkStatistic.addDelay(delay, NetworkStatistic.Type.DOWNLOAD)
         return delay
     }
+
+    fun computeRTTwithBrokerHost(deviceUID: DeviceUID) =
+        computeRTTBetweenHosts(getHostByDevice(deviceUID), hostBroker)
 
     private fun getHostByDevice(deviceUID: DeviceUID): Host {
         val h = hosts.find { it.devices.contains(deviceUID) }
@@ -92,11 +77,6 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
             throw IllegalStateException("$deviceUID not found")
         }
     }
-
-    private fun computeArrivalTime(h1: Host, h2: Host, queueTime: Time, messageLength: Int): Time =
-        maxTime(queueTime, clock.time) +
-            DoubleTime(messageLength / hostBroker.getDataRate(), TimeUnit.SECONDS) +
-            (computeRTTBetweenHosts(h1, h2))
 
     private fun computeRTTBetweenHosts(h1: Host, h2: Host): Time {
         if (h1 == h2) {
@@ -124,30 +104,62 @@ class PhysicalNetwork(configuration: Configuration, private val clock: GlobalClo
 
 object NetworkStatistic {
 
-    enum class Type { UPLOAD, DOWNLOAD }
+    enum class Type { UPLOAD, DOWNLOAD, DOWNLOAD_MAX }
 
     var delays: MutableMap<DeviceUID, MutableList<Pair<Type, Time>>> = mutableMapOf()
     private set
 
-    var count = 0
-    var delayToT: Time = DoubleTime.zero()
-    var delayMax: Time = DoubleTime.zero()
+    var countUpload = 0
+    var delayToTUpload: Time = DoubleTime.zero()
+    var delayMaxUpload: Time = DoubleTime.zero()
 
-    fun addDelay(deviceUID: DeviceUID, delay: Time, type: Type) {
+    var countDownload = 0
+    var delayToTDownload: Time = DoubleTime.zero()
+    var delayMaxDownload: Time = DoubleTime.zero()
+
+    var countDownloadMax = 0
+    var delayToTDownloadMax: Time = DoubleTime.zero()
+    var delayMaxDownloadMax: Time = DoubleTime.zero()
+
+    fun addDelay(delay: Time, type: Type) {
 /*
         delays[deviceUID] = (delays.getOrDefault(deviceUID, mutableListOf())
             .also { it.add(Pair(type, delay)) })
 */
-        count++
-        delayToT += delay
-        if (delay.isAfter(delayMax)) {
-            delayMax = delay
+        when (type) {
+            Type.UPLOAD -> {
+                countUpload++
+                delayToTUpload += delay
+                if (delay.isAfter(delayMaxUpload)) {
+                    delayMaxUpload = delay
+                }
+            }
+            Type.DOWNLOAD -> {
+                countDownload++
+                delayToTDownload += delay
+                if (delay.isAfter(delayMaxDownload)) {
+                    delayMaxDownload = delay
+                }
+            }
+            Type.DOWNLOAD_MAX -> {
+                countDownloadMax++
+                delayToTDownloadMax += delay
+                if (delay.isAfter(delayMaxDownloadMax)) {
+                    delayMaxDownloadMax = delay
+                }
+            }
         }
     }
 
     fun reset() {
-        count = 0
-        delayToT = DoubleTime.zero()
-        delayMax = DoubleTime.zero()
+        countUpload = 0
+        delayToTUpload = DoubleTime.zero()
+        delayMaxUpload = DoubleTime.zero()
+        countDownload = 0
+        delayToTDownload = DoubleTime.zero()
+        delayMaxDownload = DoubleTime.zero()
+        countDownloadMax = 0
+        delayToTDownloadMax = DoubleTime.zero()
+        delayMaxDownloadMax = DoubleTime.zero()
     }
 }
