@@ -74,6 +74,31 @@ public class GlobalClock {
     }
 
     /**
+     * reschedule a trigger to a new time
+     * @param triggerId the id of the trigger to reschedule
+     * @param newTime the new time
+     */
+    public void rescheduleTrigger(long triggerId, Time newTime) {
+        if (newTime.isBefore(this.time)) {
+            throw new IllegalStateException("impossible reschedule trigger because the new time is before now");
+        }
+        // search list with the trigger
+        var list = triggers.values()
+            .stream()
+            .filter(ts -> ts.stream().anyMatch(t -> t.uid == triggerId))
+            .findFirst().orElseThrow();
+        // search trigger in the above list
+        var trigger = list
+            .stream()
+            .filter(t -> t.uid == triggerId)
+            .findFirst().orElseThrow();
+        // remove trigger with the old time
+        list.remove(trigger);
+        // add trigger with the new time
+        addTrigger(newTime, trigger);
+    }
+
+    /**
      *
      * @param startingTime time when the trigger is fired for the first time
      * @param period the period of the trigger in second
