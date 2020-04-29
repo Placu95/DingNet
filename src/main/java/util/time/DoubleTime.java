@@ -132,8 +132,7 @@ public class DoubleTime implements Time {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DoubleTime that = (DoubleTime) o;
-        return Double.compare(that.time, time) == 0 &&
-            timeUnit == that.timeUnit;
+        return asMilli() == that.asMilli();
     }
 
     @Override
