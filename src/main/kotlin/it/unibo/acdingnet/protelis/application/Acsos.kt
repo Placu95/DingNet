@@ -160,15 +160,8 @@ class Acsos(
     override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) {}
 
     override fun storeSimulationResults(pathDir: String) {
-        val hosts = physicalNetwork.hosts
-            .groupBy { it.type }
-            .map { it.key to it.value.size }
-            .toMap()
         val parameter = configuration.configurationNetwork.print() +
-            ", hostBroker = ${configuration.brokerHostConfig.type}" +
-            ", numOfCloud = ${(hosts[HostType.CLOUD] ?: 0)}" +
-            ", numOfEdge = ${(hosts[HostType.EDGE] ?: 0)}" +
-            ", numOfSmartphone = ${(hosts[HostType.SMARTPHONE] ?: 0)}"
+            ", hostBroker = ${configuration.brokerHostConfig.type}"
         val timeUnit = TimeUnit.SECONDS
         val output =
             """
