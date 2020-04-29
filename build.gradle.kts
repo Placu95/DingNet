@@ -220,7 +220,6 @@ class ListOfFiles(list: List<String>) {
     fun getNextFile(): String? {
         synchronized(this) {
             return if (files.isNotEmpty()) {
-                println(files.size)
                 files.removeAt(0)
             } else {
                 null
