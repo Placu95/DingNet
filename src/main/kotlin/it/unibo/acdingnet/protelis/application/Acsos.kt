@@ -10,6 +10,8 @@ import it.unibo.acdingnet.protelis.dingnetwrapper.BuildingNodeWrapper
 import it.unibo.acdingnet.protelis.dingnetwrapper.SensorNodeWrapper
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.model.SensorType
+import it.unibo.acdingnet.protelis.mqtt.MqttBrokerMockSerWithDelay
+import it.unibo.acdingnet.protelis.mqtt.MqttBrokerMockWithDelay
 import it.unibo.acdingnet.protelis.mqtt.MqttMockCastWithDelay
 import it.unibo.acdingnet.protelis.mqtt.MqttMockSerWithDelay
 import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
@@ -46,7 +48,9 @@ class Acsos(
     private val configuration = Configuration(
         Simulator.getNetworkConfigFilePath().orElse(DEFAULT_NETWORK_CONFIG))
     private val physicalNetwork: PhysicalNetwork =
-        PhysicalNetwork(configuration, timer)
+        PhysicalNetwork(configuration)
+    private val brokerCast = MqttBrokerMockWithDelay(timer, physicalNetwork)
+    private val brokerSer = MqttBrokerMockSerWithDelay(timer, physicalNetwork)
     private val random = Random(configuration.configurationNetwork.seed)
     private val sampler: Sampler
 
@@ -84,7 +88,7 @@ class Acsos(
         val neighUID = StringUID("NeighborhoodManager")
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
-            MqttMockCastWithDelay(physicalNetwork, timer, neighUID),
+            MqttMockCastWithDelay(neighUID, brokerCast),
             Const.NEIGHBORHOOD_RANGE,
             nodes
         )
@@ -150,10 +154,10 @@ class Acsos(
     }
 
     private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
-        MqttMockSerWithDelay(physicalNetwork, timer, id))
+        MqttMockSerWithDelay(id, brokerSer))
 
     private fun getNewClientCast(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
-        MqttMockCastWithDelay(physicalNetwork, timer, id))
+        MqttMockCastWithDelay(id, brokerCast))
 
     override fun getPainters(): List<Painter<JXMapViewer>> = emptyList()
 
