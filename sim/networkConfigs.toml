@@ -1,18 +1,18 @@
 [configurationNetwork]
-seed = [1]
+seed = [1]                              # 1
 # probability of LoRa device on edge
-gamma = [0.0, 0.25, 0.50, 0.75, 1.0]
+gamma = [0.0, 0.33, 0.66, 1.0]          # 4
 # probability of device on smartphone
-beta = [0.0, 0.25, 0.50, 0.75, 1.0]
-dee = [10, 100]
-dcc = [5, 50, 200]
-dec = [15, 150, 600]
-dsc = [20, 200, 1000, 2000]
+beta = [0.0, 0.33, 0.66, 1.0]           # 4
+dee = [0.1, 1.0, 10.0]                  # 3
+dcc = [5, 25, 100]                      # 3
+dec = [10, 50, 300]                     # 3
+dsc = [50, 150, 500, 2000]              # 4
 dlocalhost = 0.015
 
 [brokerHostConfig]
-type = ["CLOUD", "EDGE"]
-dataRate = 43e6
+type = ["CLOUD", "EDGE"]                # 2
+dataRate = 1e9
 
 [[hostsConfig]]
     type = "CLOUD"
