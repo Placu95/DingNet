@@ -1,7 +1,4 @@
 import java.util.concurrent.CompletableFuture
-import java.util.concurrent.ForkJoinPool
-import java.util.concurrent.RecursiveTask
-import kotlin.math.min
 
 plugins {
     id("de.fayard.buildSrcVersions") version Versions.de_fayard_buildsrcversions_gradle_plugin
@@ -84,89 +81,7 @@ java {
     sourceCompatibility = JavaVersion.VERSION_11
 }
 
-val numOfCore by tasks.register<DefaultTask>("numOfCore") {
-    println(Runtime.getRuntime().availableProcessors())
-}
-
 val configDir = File(projectDir, ".temp")
-val batchThread by tasks.register<DefaultTask>("batchThread") {
-    val separator = System.getProperty("file.separator")
-    val envFile: String = System.getProperty("user.home") +
-        "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
-    val outputDir: String by project
-
-    dependsOn("build")
-    dependsOn(createConfigFile)
-    dependsOn(jar)
-    doLast {
-        val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors()
-        val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
-        val classpath = "${project.buildDir.absolutePath}" +
-            "${separator}libs${separator}$classpathJarName"
-        while (files.isNotEmpty()) {
-            val numOfJobs = min(files.size, numCores)
-            val jobs = (0 until numOfJobs)
-                .map { files.removeAt(0) }
-                .map {
-                    "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
-                }.map {
-                    JobThread(runtime, it)
-                }.map {
-                    Pair(it, it.future)
-                }
-            jobs.forEach { it.first.start() }
-            jobs.forEach { it.second.get() }
-//            jobs.forEach { it.get() }
-        }
-    }
-}
-
-class JobThread(private val runtime: Runtime, private val cmd: String) : Thread() {
-    val future: CompletableFuture<Int> = CompletableFuture()
-    override fun run() {
-        runtime.exec(cmd).onExit().get()
-        future.complete(0)
-    }
-}
-
-val batchExecutor by tasks.register<DefaultTask>("batchExecutor") {
-    val separator = System.getProperty("file.separator")
-    val envFile: String = System.getProperty("user.home") +
-        "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
-    val outputDir: String by project
-
-    dependsOn("build")
-    dependsOn(createConfigFile)
-    dependsOn(jar)
-    doLast {
-        val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors()
-        val forkJoinPool = ForkJoinPool(numCores)
-        val files = configDir.listFiles().filter { it.extension == "toml" }.toMutableList()
-        val classpath = "${project.buildDir.absolutePath}" +
-            "${separator}libs${separator}$classpathJarName"
-        while (files.isNotEmpty()) {
-            val numOfJobs = min(files.size, numCores)
-            val jobs = (0 until numOfJobs)
-                .map { files.removeAt(0) }
-                .map {
-                    "java -Xmx1700m -cp $classpath Simulator -cf $envFile -nf $it -of $outputDir"
-                }.map {
-                    JobExec(runtime, it)
-                }
-            jobs.forEach { forkJoinPool.execute(it) }
-            jobs.forEach { it.join() }
-        }
-    }
-}
-
-class JobExec(private val runtime: Runtime, private val cmd: String) : RecursiveTask<Int>() {
-    override fun compute(): Int {
-        runtime.exec(cmd).onExit().get()
-        return 1
-    }
-}
 
 val classpathJarName = "classpath.jar"
 val jar by tasks.getting(Jar::class) {
