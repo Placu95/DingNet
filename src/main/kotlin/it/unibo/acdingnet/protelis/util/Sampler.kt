@@ -4,6 +4,7 @@ import iot.GlobalClock
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.NetworkStatistic
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
+import it.unibo.acdingnet.protelis.util.Utils.printTime
 import util.time.DoubleTime
 import util.time.Time
 import util.time.TimeUnit
@@ -105,8 +106,6 @@ data class Sampling(
         "${printTime(delaySumDownloadMaxTot, tU)} ${printTime(delayMaxDownloadMaxTot, tU)} " +
         "$runOnCloudPartial $runOnEdgePartial $runOnSmartphonePartial " +
         "$runOnCloudTot $runOnEdgeTot $runOnSmartphoneTot"
-
-    private fun printTime(t: Time, tU: TimeUnit) = Utils.roundToDecimal(t.getAs(tU), 2).toString()
 
     companion object {
         fun header(timeUnit: TimeUnit) = "instant[${timeUnit.name}] " +
