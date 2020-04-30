@@ -8,7 +8,8 @@ data class IncomingMessage(
     val delay: Time,
     val msgSize: Int,
     var t_end: Time,
-    val idTrigger: Long
+    var idTrigger: Long,
+    val triggerHandler: () -> Unit
 ) {
     companion object {
         private var id = 0L
