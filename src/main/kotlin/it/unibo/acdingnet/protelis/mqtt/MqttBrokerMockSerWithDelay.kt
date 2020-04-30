@@ -39,13 +39,13 @@ class MqttBrokerMockSerWithDelay(
 
     // for each incoming msg recompute new t_end and if it is changed reschedule the trigger
     private fun refreshTEnd(bwReal: Double) = getIncomingQueue().forEach {
-        val t_endNew = it.t_send + it.delay +
+        val t_endNew = it.tSend + it.delay +
             DoubleTime(it.msgSize / bwReal, TimeUnit.SECONDS)
         // t_endNew.isAfter(clock.time) is only for safety, but it shouldn't happen
         if (/*t_endNew != it.t_end && */t_endNew.isAfter(clock.time)) {
             clock.removeTrigger(it.idTrigger)
             it.idTrigger = clock.addTriggerOneShot(t_endNew, it.triggerHandler)
-            it.t_end = t_endNew
+            it.tEnd = t_endNew
         }
     }
 
@@ -57,7 +57,7 @@ class MqttBrokerMockSerWithDelay(
         }
         // add statistic for communication client to broker
         NetworkStatistic.addDelay(
-            myEntry.t_end - myEntry.t_send, NetworkStatistic.Type.UPLOAD)
+            myEntry.tEnd - myEntry.tSend, NetworkStatistic.Type.UPLOAD)
         // find all the receivers
         val receivers = subscription.filterKeys { checkTopicMatch(topic, it) }
         val numOfReceiver = receivers.map { it.value }.flatten().size

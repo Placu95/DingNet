@@ -66,7 +66,7 @@ open class MqttBrokerMock protected constructor() {
     }
 
     protected fun checkTopicMatch(topic: String, filter: String): Boolean {
-        if (topic == filter) {
+        if (topic === filter) {
             return true
         }
         var indexT = 0
@@ -74,7 +74,7 @@ open class MqttBrokerMock protected constructor() {
         while (indexF < filter.length && indexT < topic.length) {
             when (filter[indexF]) {
                 topic[indexT] -> indexT++
-                MqttTopicConst.WILDCARD_SINGLE_LEVEL[0] -> indexT = topic.indexOf(MqttTopicConst.LEVEL_SEPARATOR, indexT)
+                MqttTopicConst.WILDCARD_SINGLE_LEVEL[0] -> indexT = topic.indexOf(MqttTopicConst.LEVEL_SEPARATOR, startIndex = indexT + 1)
                 MqttTopicConst.WILDCARD_MULTI_LEVEL[0] -> return indexF == filter.length - 1
                 else -> return false
             }

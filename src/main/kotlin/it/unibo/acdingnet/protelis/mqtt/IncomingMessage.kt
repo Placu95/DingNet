@@ -4,10 +4,10 @@ import util.time.Time
 
 data class IncomingMessage(
     val id: Long,
-    val t_send: Time,
+    val tSend: Time,
     val delay: Time,
     val msgSize: Int,
-    var t_end: Time,
+    var tEnd: Time,
     var idTrigger: Long,
     val triggerHandler: () -> Unit
 ) {

@@ -116,6 +116,11 @@ public class GlobalClock {
         return false;
     }
 
+    public boolean removeTrigger(Time fromTime, long triggerId) {
+        return triggers.get(TimeHelper.ceilToMilli(fromTime))
+            .removeIf(p -> p.getUid() == triggerId);
+    }
+
     private void fireTrigger() {
         var triggersToFire = triggers.get(getTime());
         if (triggersToFire != null) {

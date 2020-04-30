@@ -8,7 +8,8 @@ import java.util.Objects;
 public class DoubleTime implements Time {
 
     private static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MILLIS;
-    private double time;
+    private static final DoubleTime ZERO = new DoubleTime(0);
+    private final double time;
     private final TimeUnit timeUnit;
 
     // region constructor
@@ -27,7 +28,7 @@ public class DoubleTime implements Time {
     // endregion
 
     static public Time zero() {
-        return new DoubleTime(0);
+        return ZERO;
     }
 
     static public Time fromSeconds(double time) {
@@ -137,7 +138,7 @@ public class DoubleTime implements Time {
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, timeUnit);
+        return Double.hashCode(time) ^ timeUnit.hashCode();
     }
 
     @Override

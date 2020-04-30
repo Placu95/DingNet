@@ -1,6 +1,8 @@
 package util.time;
 
-public interface Time {
+import org.jetbrains.annotations.NotNull;
+
+public interface Time extends Comparable<Time> {
 
     Time as(TimeUnit timeUnit);
 
@@ -39,4 +41,9 @@ public interface Time {
     boolean isAfter(Time other);
 
     boolean isBefore(Time other);
+
+    @Override
+    default int compareTo(@NotNull Time o) {
+        return equals(o) ? 0 : isAfter(o) ? 1 : -1;
+    }
 }
