@@ -240,7 +240,7 @@ val batchThread2 by tasks.register<DefaultTask>("batchThread2") {
     dependsOn(jar)
     doLast {
         val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors() / 2
+        val numCores = runtime.availableProcessors()
         val files = ListOfFiles(configDir.listFiles()
             .filter { it.extension == "toml" }.map { it.absolutePath })
         val classpath = "${project.buildDir.absolutePath}" +
