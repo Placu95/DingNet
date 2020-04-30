@@ -20,12 +20,10 @@ public class GlobalClock {
     private Time time;
 
     private Map<Time, List<Trigger>> triggers;
-    private Map<Long, Time> triggersById;
 
     public GlobalClock() {
         time = DoubleTime.zero();
         triggers = new HashMap<>();
-        triggersById = new HashMap<>();
     }
 
     /**
@@ -56,7 +54,6 @@ public class GlobalClock {
     public void reset() {
         this.time = DoubleTime.zero();
         triggers = new HashMap<>();
-        triggersById = new HashMap<>();
     }
 
     public boolean containsTriggers(Time time) {
@@ -74,28 +71,6 @@ public class GlobalClock {
             trigger.run();
             return DoubleTime.zero();
         });
-    }
-
-    /**
-     * reschedule a trigger to a new time
-     * @param triggerId the id of the trigger to reschedule
-     * @param newTime the new time
-     */
-    public void rescheduleTrigger(long triggerId, Time newTime) {
-        if (newTime.isBefore(this.time)) {
-            throw new IllegalStateException("impossible reschedule trigger because the new time is before now");
-        }
-        // search list with the trigger
-        var list = triggers.get(triggersById.get(triggerId));
-        // search trigger in the above list
-        var trigger = list
-            .stream()
-            .filter(t -> t.uid == triggerId)
-            .findFirst().orElseThrow();
-        // remove trigger with the old time
-        list.remove(trigger);
-        // add trigger with the new time
-        addTrigger(newTime, trigger);
     }
 
     /**
@@ -130,13 +105,11 @@ public class GlobalClock {
             List<Trigger> newTriggers = new ArrayList<>(List.of(trigger));
             triggers.put(time, newTriggers);
         }
-        triggersById.put(trigger.uid, time);
     }
 
     public boolean removeTrigger(long triggerId) {
         for (Map.Entry<Time, List<Trigger>> e: triggers.entrySet()) {
             if (e.getValue().removeIf(p -> p.getUid() == triggerId)) {
-                triggersById.remove(triggerId);
                 return true;
             }
         }
@@ -151,7 +124,6 @@ public class GlobalClock {
             for (int i = 0; i < triggersToFire.size(); i++) {
                 var trigger = triggersToFire.get(i);
                 Time newTime = trigger.getCallback().get();
-                triggersById.remove(trigger.uid);
                 if (newTime.isAfter(getTime())) {
                     addTrigger(newTime, trigger);
                 }
