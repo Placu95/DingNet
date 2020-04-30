@@ -1,7 +1,5 @@
 package util.time;
 
-import java.util.Objects;
-
 /**
  * Immutable class, default unit of measure is milliseconds
  */
