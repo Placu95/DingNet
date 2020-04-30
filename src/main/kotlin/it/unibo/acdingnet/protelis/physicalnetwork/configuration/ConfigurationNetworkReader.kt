@@ -3,6 +3,7 @@ package it.unibo.acdingnet.protelis.physicalnetwork.configuration
 import com.uchuhimo.konf.Config
 import com.uchuhimo.konf.ConfigSpec
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
+import it.unibo.acdingnet.protelis.util.Utils.printTime
 import util.time.DoubleTime
 import util.time.Time
 import util.time.TimeUnit
@@ -23,12 +24,9 @@ data class ConfigurationNetwork(
         check(beta in 0.0..1.0) { "gamma has to be in the range [0, 1], but it is: $gamma" }
     }
 
-    fun print() = "$this"
-        .drop(21) // "ConfigurationNetwork("
-        .dropLast(1) // ")"
-        .replace("=", " = ")
-        .replace("DoubleTime[time = ", "")
-        .replace(", timeUnit = ", "[")
+    fun print(tU: TimeUnit) = "seed = $seed, gamma = $gamma, beta = $beta, " +
+        "dee = ${printTime(dee, tU)}, dcc = ${printTime(dcc, tU)}, dec = ${printTime(dec, tU)}, " +
+        "dsc = ${printTime(dsc, tU)}, dLocalhost = ${printTime(dLocalhost, tU)}"
 
     companion object : ConfigSpec("configurationNetwork") {
         private val seed by required<Long>()

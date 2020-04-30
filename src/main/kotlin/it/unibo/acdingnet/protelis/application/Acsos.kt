@@ -164,7 +164,7 @@ class Acsos(
     override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) {}
 
     override fun storeSimulationResults(pathDir: String) {
-        val parameter = configuration.configurationNetwork.print() +
+        val parameter = configuration.configurationNetwork.print(TimeUnit.MILLIS) +
             ", hostBroker = ${configuration.brokerHostConfig.type}"
         val timeUnit = TimeUnit.SECONDS
         val output =

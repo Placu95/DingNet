@@ -2,6 +2,7 @@
 package it.unibo.gradle
 
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
+import util.time.TimeUnit
 import java.io.File
 
 fun main(args: Array<String>) {
@@ -18,7 +19,7 @@ fun main(args: Array<String>) {
         .map { Pair(Configuration(it.absolutePath), it.name) }
         .map {
             Pair(
-                it.first.configurationNetwork.print() +
+                it.first.configurationNetwork.print(TimeUnit.MILLIS) +
                     ", hostBroker = ${it.first.brokerHostConfig.type}",
                 it.second)
         }
