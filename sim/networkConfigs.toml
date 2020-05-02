@@ -1,5 +1,5 @@
 [configurationNetwork]
-seed = [1, 2, 3, 4, 5]                  # 5
+seed = [6, 7, 8, 9, 10]                 # 5
 # probability of LoRa device on edge
 gamma = [0.0, 0.33, 0.66, 1.0]          # 4
 # probability of device on smartphone
