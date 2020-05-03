@@ -158,6 +158,8 @@ def beautifyValue(v):
             return int(v)
         return v
     except:
+        if type(v) == np.str_:
+            v = v.replace('\n', '').replace(' ', '_')
         return v
 
 if __name__ == '__main__':
