@@ -34,7 +34,6 @@ dependencies {
     implementation(Libs.gson)
     implementation(Libs.moquette_broker)
     implementation(Libs.konf)
-//    implementation(files(Util.downloadLibFromUrl(ExternalLib.mqtt_client_wrapper)))
     implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0")
     // dependencies for protelis application
     implementation(Libs.protelis)
@@ -107,7 +106,7 @@ val createConfigFile by tasks.register<JavaExec>("createConfigFile") {
     classpath = sourceSets["main"].runtimeClasspath
 }
 
-class JobThread2(
+class Job(
     private val runtime: Runtime,
     private val listOfFiles: ListOfFiles,
     private val classpath: String,
@@ -144,32 +143,28 @@ class ListOfFiles(list: List<String>) {
     }
 }
 
-val batchThread2 by tasks.register<DefaultTask>("batchThread2") {
+val batch by tasks.register<DefaultTask>("batch") {
     val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
         "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
     val outputDir: String by project
+    val outputDirFile = File(outputDir)
+    if (!outputDirFile.exists() || !outputDirFile.isDirectory) {
+        outputDirFile.mkdir()
+    }
 
     dependsOn("build")
     dependsOn(createConfigFile)
     dependsOn(jar)
     doLast {
         val runtime = Runtime.getRuntime()
-        val numCores = runtime.availableProcessors()
-        val files = ListOfFiles(configDir.listFiles()
-            .filter { it.extension == "toml" }.map { it.absolutePath })
-        val classpath = "${project.buildDir.absolutePath}" +
-            "${separator}libs${separator}$classpathJarName"
-
-        val jobs = (0 until numCores)
-            .map {
-                JobThread2(runtime, files, classpath, envFile, outputDir)
-            }.map {
-                Pair(it, it.future)
-            }
+        val files = ListOfFiles(configDir.listFiles().filter { it.extension == "toml" }.map { it.absolutePath })
+        val classpath = "${project.buildDir.absolutePath}${separator}libs${separator}$classpathJarName"
+        val jobs = (0 until runtime.availableProcessors())
+            .map { Job(runtime, files, classpath, envFile, outputDir) }
+            .map { Pair(it, it.future) }
         jobs.forEach { it.first.start() }
         jobs.forEach { it.second.get() }
-//            jobs.forEach { it.get() }
     }
 }
 
