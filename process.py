@@ -241,8 +241,9 @@ if __name__ == '__main__':
     # Read the last time the data was processed, reprocess only if new data exists, otherwise just load
     import pickle
     import os
+    separator = os.path.sep
     if os.path.exists(directory):
-        newestFileTime = max([os.path.getmtime(directory + '/' + file) for file in os.listdir(directory)], default=0.0)
+        newestFileTime = max([os.path.getmtime(directory + separator + file) for file in os.listdir(directory)], default=0.0)
         try:
             lastTimeProcessed = pickle.load(open('timeprocessed', 'rb'))
         except:
@@ -262,7 +263,7 @@ if __name__ == '__main__':
                 # Collect all files for the experiment of interest
                 import fnmatch
                 allfiles = filter(lambda file: fnmatch.fnmatch(file, experiment + '_*.txt'), os.listdir(directory))
-                allfiles = [directory + '/' + name for name in allfiles]
+                allfiles = [directory + separator + name for name in allfiles]
                 allfiles.sort()
                 # From the file name, extract the independent variables
                 dimensions = {}
@@ -353,13 +354,13 @@ if __name__ == '__main__':
         return (fig, ax)
     def generate_all_charts(means, errors = None, basedir=''):
         viable_coords = { coord for coord in means.coords if means[coord].size > 0 }
-        for comparison_variable in viable_coords - {timeColumnName}:
+        for comparison_variable in viable_coords - {timeColumnName}:                            # beta
             mergeable_variables = viable_coords - {timeColumnName, comparison_variable}
-            for current_coordinate in mergeable_variables:
+            for current_coordinate in mergeable_variables:                                      # gamma
                 merge_variables = mergeable_variables - { current_coordinate }
                 merge_data_view = means.mean(dim = merge_variables, skipna = True)
                 merge_error_view = errors.mean(dim = merge_variables, skipna = True)
-                for current_coordinate_value in merge_data_view[current_coordinate].values:
+                for current_coordinate_value in merge_data_view[current_coordinate].values:     # [0, 0.33, 0.66, 1] -> 0.66
                     beautified_value = beautifyValue(current_coordinate_value)
                     for current_metric in merge_data_view.data_vars:
                         title = f'{label_for(current_metric)} for diverse {label_for(comparison_variable)} when {label_for(current_coordinate)}={beautified_value}'
@@ -381,16 +382,16 @@ if __name__ == '__main__':
                             ax.set_xlim(minTime, maxTime)
                             ax.legend()
                             fig.tight_layout()
-                            by_time_output_directory = f'{output_directory}/{basedir}/{comparison_variable}'
+                            by_time_output_directory = f'{output_directory}{separator}{basedir}{separator}{comparison_variable}'
                             Path(by_time_output_directory).mkdir(parents=True, exist_ok=True)
                             figname = f'{comparison_variable}_{current_metric}_{current_coordinate}_{beautified_value}{"_err" if withErrors else ""}'
                             for symbol in r".[]\/@:":
                                 figname = figname.replace(symbol, '_')
-                            fig.savefig(f'{by_time_output_directory}/{figname}.pdf')
+                            fig.savefig(f'{by_time_output_directory}{separator}{figname}.pdf')
                             plt.close(fig)
     for experiment in experiments:
         current_experiment_means = means[experiment]
         current_experiment_errors = stdevs[experiment]
-        generate_all_charts(current_experiment_means, current_experiment_errors, basedir = f'{experiment}/all')
+        generate_all_charts(current_experiment_means, current_experiment_errors, basedir = f'{experiment}{separator}all')
         
 # Custom charting
