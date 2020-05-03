@@ -1,6 +1,5 @@
 package it.unibo.mqttclientwrapper
 
-
 /**
  * Available types of MQTT client
  */

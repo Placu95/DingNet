@@ -31,8 +31,7 @@ open class MqttMockCast : MqttClientBasicApi {
         broker.publish(topic, message)
     }
 
-    override fun <T> subscribe(subscriber: Any, topicFilter: String, classMessage: Class<T>,
-                                                 messageConsumer: (topic: String, message: T) -> Unit) {
+    override fun <T> subscribe(subscriber: Any, topicFilter: String, classMessage: Class<T>, messageConsumer: (topic: String, message: T) -> Unit) {
         if (!subscribed.containsKey(topicFilter)) {
             broker.subscribe(this, topicFilter)
             subscribed[topicFilter] = mutableListOf()
@@ -56,13 +55,13 @@ open class MqttMockCast : MqttClientBasicApi {
 
     override fun <T> addSerializer(clazz: Class<T>, serializer: JsonSerializer<T>): MqttClientBasicApi = printUselessFunction()
 
-    override fun <T> addSerializer(clazz: Class<T>, serializer: (T, Type, JsonSerializationContext) -> JsonElement
-        ): MqttClientBasicApi = printUselessFunction()
+    override fun <T> addSerializer(clazz: Class<T>, serializer: (T, Type, JsonSerializationContext) -> JsonElement): MqttClientBasicApi =
+        printUselessFunction()
 
     override fun <T> addDeserializer(clazz: Class<T>, deserializer: JsonDeserializer<T>): MqttClientBasicApi = printUselessFunction()
 
-    override fun <T> addDeserializer(clazz: Class<T>, deserializer: (JsonElement, Type, JsonDeserializationContext) -> T
-        ): MqttClientBasicApi = printUselessFunction()
+    override fun <T> addDeserializer(clazz: Class<T>, deserializer: (JsonElement, Type, JsonDeserializationContext) -> T): MqttClientBasicApi =
+        printUselessFunction()
 
     private fun printUselessFunction(): MqttMockCast {
         println("[INFO] This function in mock implementation don't do nothing")
@@ -84,7 +83,8 @@ open class MqttMockCast : MqttClientBasicApi {
     private class MqttMessageConsumer<T>(
         val subscriber: Any,
         private val consumer: (topic: String, message: T) -> Unit,
-        private val clazz: Class<T>) {
+        private val clazz: Class<T>
+    ) {
 
         fun accept(t: String, message: Any) {
             consumer.invoke(t, clazz.cast(message))

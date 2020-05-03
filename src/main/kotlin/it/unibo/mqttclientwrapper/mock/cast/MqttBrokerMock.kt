@@ -41,7 +41,7 @@ open class MqttBrokerMock protected constructor() {
      */
     fun publish(topic: String, message: Any) {
         subscription.filterKeys { checkTopicMatch(topic, it) }
-            .forEach{ it.value.forEach { c -> c.dispatch(it.key, topic, message) } }
+            .forEach { it.value.forEach { c -> c.dispatch(it.key, topic, message) } }
     }
 
     /**

@@ -33,8 +33,7 @@ open class MqttMockSer @JvmOverloads constructor (
         broker.publish(topic, gson.toJson(message))
     }
 
-    override fun <T> subscribe(subscriber: Any, topicFilter: String, classMessage: Class<T>,
-                                                 messageConsumer: (topic: String, message: T) -> Unit) {
+    override fun <T> subscribe(subscriber: Any, topicFilter: String, classMessage: Class<T>, messageConsumer: (topic: String, message: T) -> Unit) {
         if (!subscribed.containsKey(topicFilter)) {
             broker.subscribe(this, topicFilter)
             subscribed[topicFilter] = mutableListOf()
@@ -92,7 +91,8 @@ open class MqttMockSer @JvmOverloads constructor (
         val subscriber: Any,
         private val consumer: (topic: String, message: T) -> Unit,
         private val clazz: Class<T>,
-        private val gson: Gson) {
+        private val gson: Gson
+    ) {
 
         fun accept(t: String, message: String) {
             consumer.invoke(t, gson.fromJson(message, clazz))

@@ -8,8 +8,8 @@ plugins {
     id("com.github.johnrengelman.shadow") version
         Versions.com_github_johnrengelman_shadow_gradle_plugin
     checkstyle
-//    id("org.jlleitschuh.gradle.ktlint") version
-//        Versions.org_jlleitschuh_gradle_ktlint_gradle_plugin
+    id("org.jlleitschuh.gradle.ktlint") version
+        Versions.org_jlleitschuh_gradle_ktlint_gradle_plugin
 }
 
 val dingNetGroup = "KULeuven"

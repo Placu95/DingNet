@@ -131,12 +131,10 @@ open class PahoMqttClient @JvmOverloads constructor(
     private inner class MqttMessageConsumer<T>(
         val subscriber: Any,
         private val consumer: (topic: String, message: T) -> Unit,
-        private val clazz: Class<T>) {
-
+        private val clazz: Class<T>
+    ) {
         fun accept(t: String, message: String) {
             consumer.invoke(t, gson.fromJson(message, clazz))
         }
-
     }
-
 }

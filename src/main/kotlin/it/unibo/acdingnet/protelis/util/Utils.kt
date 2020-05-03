@@ -24,6 +24,5 @@ object Utils {
 
     fun Time.max(t2: Time) = if (isAfter(t2)) this else t2
 
-
     fun printTime(t: Time, tU: TimeUnit) = Utils.roundToDecimal(t.getAs(tU), 2).toString()
 }

@@ -18,7 +18,7 @@ object MQTTClientSingleton {
      * @return the singleton instance of [MqttClientBasicApi] of the predefined type [MqttClientType]
      */
     val instance: MqttClientBasicApi
-       @JvmStatic get() {
+        @JvmStatic get() {
             if (clientBasicApi == null) {
                 throw IllegalStateException("Before get the singleton instance of the MQTT client, " +
                         "you have to create it with MQTTClientSingleton.ClientBuilder")
@@ -37,7 +37,7 @@ object MQTTClientSingleton {
     class ClientBuilder {
 
         private val gsonBuilder = GsonBuilder()
-        private var address : String? = null
+        private var address: String? = null
         private var clientId: String? = null
 
         /**
@@ -121,7 +121,7 @@ object MQTTClientSingleton {
             if (clientBasicApi != null) {
                 throw IllegalStateException("singleton instance already created")
             }
-            clientBasicApi = when(type) {
+            clientBasicApi = when (type) {
                 MqttClientType.MOCK_CAST -> MqttMockCast()
                 MqttClientType.MOCK_SERIALIZATION -> MqttMockSer(gsonBuilder.create())
                 MqttClientType.PAHO -> {
@@ -140,6 +140,5 @@ object MQTTClientSingleton {
             }
             return clientBasicApi!!
         }
-
     }
 }

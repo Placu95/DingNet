@@ -175,6 +175,5 @@ interface MqttClientBasicApi {
      * @throws UnsupportedOperationException if the client do not support this operation
      */
     @Throws(UnsupportedOperationException::class)
-    fun <T> addDeserializerIfAbsent(clazz: Class<T>, deserializer: (JsonElement, Type, JsonDeserializationContext) -> T): MqttClientBasicApi
-            = TODO("not implemented yet")
+    fun <T> addDeserializerIfAbsent(clazz: Class<T>, deserializer: (JsonElement, Type, JsonDeserializationContext) -> T): MqttClientBasicApi = TODO()
 }
