@@ -45,7 +45,7 @@ class MqttBrokerMockWithDelay(
     private fun refreshTEnd(bwReal: Double) = getIncomingQueue().forEach {
         val tEndNew = it.tSend + it.delay + DoubleTime(it.msgSize / bwReal, TimeUnit.SECONDS)
         // t_endNew.isAfter(clock.time) is only for safety, but it shouldn't happen
-        if (/*t_endNew != it.t_end && */tEndNew.isAfter(clock.time)) {
+        if (tEndNew.isAfter(clock.time)) {
             clock.removeTrigger(it.tEnd, it.idTrigger)
             it.idTrigger = clock.addTriggerOneShot(tEndNew, it.triggerHandler)
             it.tEnd = tEndNew
@@ -84,30 +84,9 @@ class MqttBrokerMockWithDelay(
             }
             NetworkStatistic.addDelay(msgReceivedTime - clock.time, NetworkStatistic.Type.DOWNLOAD)
         }
-//        receivers.forEach { (t, cs) ->
-//            cs
-//                .forEach {
-//                    val receiverRTT = physicalNetwork.computeRTTwithBrokerHost(it.deviceUID)
-//                    receiversRTT[it.deviceUID] = receiverRTT
-//                    // when the message is arrived to the receiver
-//                    val msgReceivedTime = finishToSend + receiverRTT
-//                    // dispatch the message to the receiver
-//                    clock.addTriggerOneShot(msgReceivedTime) {
-//                        it.dispatch(t, topic, message)
-//                    }
-//                    NetworkStatistic.addDelay(
-//                        msgReceivedTime - clock.time, NetworkStatistic.Type.DOWNLOAD)
-//                }
-//        }
-//        receiversRTT.values.maxWith(
-//            Comparator { o1, o2 -> o1.asSecond().compareTo(o2.asSecond()) }
-//        )?.let {
-//        val receivingTime = finishToSend + maxDelay
         NetworkStatistic.addDelay(finishToSend + maxDelay - clock.time, NetworkStatistic.Type.DOWNLOAD_MAX)
         setSendingQueueFreeFrom(finishToSend)
     }
-
-
 
     private fun <E> computeLength(message: E) = jsonSerializer.deepSerialize(
         when (message) {
