@@ -8,7 +8,7 @@ object Const {
     const val MQTT_CLIENT_ID = "testFenomeno1995-app"
     const val MIN_TEMP = 17.0
     const val MAX_TEMP = 25.0
-    const val DEFAULT_IAQ_LEVEL = 20
+    const val DEFAULT_IAQ_LEVEL = 75
 
     object ProtelisEnv {
         const val IAQLEVEL = "iaqLevel"
