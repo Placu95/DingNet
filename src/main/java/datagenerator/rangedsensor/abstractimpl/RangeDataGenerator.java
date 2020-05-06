@@ -106,7 +106,16 @@ abstract public class RangeDataGenerator implements SensorDataGenerator {
     }
 
     private double getFunValue(double x, double y, Time time) {
-        return function.value(x, y, time.getAs(timeUnit));
+        var funValue = function.value(x, y, time.getAs(timeUnit));
+        var range = getCellLevel(x, y, time);
+        // if the fun value is outside from the range of validity of the cell return the closest range bound
+        if (funValue < range.getLowerBound()) {
+            return range.getLowerBound();
+        }
+        if (funValue > range.getUpperBound()) {
+            return range.getUpperBound();
+        }
+        return funValue;
     }
 
     private byte[] convertFunValue(double val) {
