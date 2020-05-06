@@ -26,7 +26,7 @@ data class ConfigurationNetwork(
 
     fun print(tU: TimeUnit) = "seed = $seed, gamma = $gamma, beta = $beta, " +
         "dee = ${printTime(dee, tU)}, dcc = ${printTime(dcc, tU)}, dec = ${printTime(dec, tU)}, " +
-        "dsc = ${printTime(dsCnd, tU)}, dLocalhost = ${printTime(dLocalhost, tU)}"
+        "dsCnd = ${printTime(dsCnd, tU)}, dLocalhost = ${printTime(dLocalhost, tU)}"
 
     companion object : ConfigSpec("configurationNetwork") {
         private val seed by required<Long>()
