@@ -18,7 +18,7 @@ public def emptyFun() = 0
 
 public def idw(sensorValue) = if(sensorValue.filter { it.get(0) == getUID() }.isEmpty()) {
 		let weight = sensorValue.map{ 1 / it.get(1) }.reduce(1) { r1, r2 -> r1 + r2 }
-        sensorValue.map { it.get(2) / it.get(1) }.reduce(1) { r1, r2 -> r1 + r2 } / weight
+        sensorValue.map { it.get(2) / it.get(1) }.reduce(0) { r1, r2 -> r1 + r2 } / weight
 	} else {
 		sensorValue.filter { it.get(0) == getUID() }.get(0).get(2)
 	}

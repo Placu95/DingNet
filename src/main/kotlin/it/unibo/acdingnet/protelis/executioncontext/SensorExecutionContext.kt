@@ -1,4 +1,4 @@
-package it.unibo.acdingnet.protelis.executioncontext
+ package it.unibo.acdingnet.protelis.executioncontext
 
 import it.unibo.acdingnet.protelis.model.SensorType
 import it.unibo.acdingnet.protelis.node.SensorNode
@@ -47,7 +47,7 @@ open class SensorExecutionContext @JvmOverloads constructor(
     }
 
     fun temperatureByPollution(pollutionValue: Double): Double = when {
-        pollutionValue < 1 -> MAX_TEMP
+        pollutionValue < 1 -> (MAX_TEMP + MIN_TEMP) / 2
         pollutionValue > 100 -> MIN_TEMP
         else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
     }
