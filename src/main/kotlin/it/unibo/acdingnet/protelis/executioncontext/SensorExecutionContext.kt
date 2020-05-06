@@ -25,6 +25,8 @@ open class SensorExecutionContext @JvmOverloads constructor(
     randomSeed, execEnvironment) {
 
     override fun instance(): SensorExecutionContext = this
+    var maxTemperatureAllowed: Double = (MAX_TEMP + MIN_TEMP) / 2
+    private set
 
     override fun manageSensorValues(sensorsValue: Map<SensorType, Double>) {
         sensorsValue
@@ -46,10 +48,13 @@ open class SensorExecutionContext @JvmOverloads constructor(
         return coordinates.toLatLongPosition().distanceTo(position.toLatLongPosition())
     }
 
-    fun temperatureByPollution(pollutionValue: Double): Double = when {
-        pollutionValue < 1 -> (MAX_TEMP + MIN_TEMP) / 2
-        pollutionValue > 100 -> MIN_TEMP
-        else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
+    fun temperatureByPollution(pollutionValue: Double): Double {
+        maxTemperatureAllowed = when {
+            pollutionValue < 1 -> (MAX_TEMP + MIN_TEMP) / 2
+            pollutionValue > 100 -> MIN_TEMP
+            else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
+        }
+        return maxTemperatureAllowed
     }
     //endregion
 }
