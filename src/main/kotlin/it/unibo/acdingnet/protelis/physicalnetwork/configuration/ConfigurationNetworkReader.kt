@@ -16,7 +16,7 @@ data class ConfigurationNetwork(
     val dee: Time,
     val dcc: Time,
     val dec: Time,
-    val dsc: Time,
+    val dsCnd: Time,
     val dLocalhost: Time
 ) {
     init {
@@ -26,7 +26,7 @@ data class ConfigurationNetwork(
 
     fun print(tU: TimeUnit) = "seed = $seed, gamma = $gamma, beta = $beta, " +
         "dee = ${printTime(dee, tU)}, dcc = ${printTime(dcc, tU)}, dec = ${printTime(dec, tU)}, " +
-        "dsc = ${printTime(dsc, tU)}, dLocalhost = ${printTime(dLocalhost, tU)}"
+        "dsc = ${printTime(dsCnd, tU)}, dLocalhost = ${printTime(dLocalhost, tU)}"
 
     companion object : ConfigSpec("configurationNetwork") {
         private val seed by required<Long>()
@@ -35,12 +35,12 @@ data class ConfigurationNetwork(
         private val dee by required<Double>()
         private val dcc by required<Double>()
         private val dec by required<Double>()
-        private val dsc by required<Double>()
+        private val dscnd by required<Double>()
         private val dlocalhost by required<Double>()
 
         fun read(config: Config) = ConfigurationNetwork(config[seed],
             config[gamma], config[beta], toTime(config[dee]), toTime(config[dcc]),
-            toTime(config[dec]), toTime(config[dsc]), toTime(config[dlocalhost])
+            toTime(config[dec]), toTime(config[dscnd]), toTime(config[dlocalhost])
         )
 
         private fun toTime(t: Double) = DoubleTime(t, TimeUnit.MILLIS)

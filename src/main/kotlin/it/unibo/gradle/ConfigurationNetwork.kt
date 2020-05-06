@@ -13,7 +13,7 @@ data class ConfigurationNetworkInput(
     val dee: List<Double>,
     val dcc: List<Double>,
     val dec: List<Double>,
-    val dsc: List<Double>,
+    val dscnd: List<Double>,
     val dlocalhost: Double
 ) {
     companion object : ConfigSpec("") {
@@ -52,7 +52,7 @@ data class ConfigurationNetworkOutput(
     val dee: Double,
     val dcc: Double,
     val dec: Double,
-    val dsc: Double,
+    val dscnd: Double,
     val dlocalhost: Double
 ) {
     companion object : ConfigSpec("") {

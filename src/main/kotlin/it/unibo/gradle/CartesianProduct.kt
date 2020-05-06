@@ -20,7 +20,7 @@ fun main(args: Array<String>) {
         configNet.dee.map { Pair("dee", it) },
         configNet.dcc.map { Pair("dcc", it) },
         configNet.dec.map { Pair("dec", it) },
-        configNet.dsc.map { Pair("dsc", it) },
+        configNet.dscnd.map { Pair("dscnd", it) },
         configBroker.type.map { Pair("broker", it) }
     )
     val cp = Lists.cartesianProduct(lists).map { it.toMap() }
@@ -37,7 +37,7 @@ fun main(args: Array<String>) {
                 dee = it["dee"].toString().toDouble(),
                 dcc = it["dcc"].toString().toDouble(),
                 dec = it["dec"].toString().toDouble(),
-                dsc = it["dsc"].toString().toDouble(),
+                dscnd = it["dscnd"].toString().toDouble(),
                 dlocalhost = configNet.dlocalhost
             ),
             BrokerHostConfigOutput(
