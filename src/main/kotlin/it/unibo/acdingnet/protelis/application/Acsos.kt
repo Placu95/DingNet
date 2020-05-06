@@ -44,7 +44,7 @@ class Acsos(
 
     private val neigh: NeighborhoodManager
     private val loraNodes: List<SensorNodeWrapper>
-    private val otherNodes: List<GenericNode>
+    private val otherNodes: List<BuildingNodeWrapper>
     private val configuration = Configuration(
         Simulator.getNetworkConfigFilePath().orElse(DEFAULT_NETWORK_CONFIG))
     private val physicalNetwork: PhysicalNetwork =
@@ -149,8 +149,10 @@ class Acsos(
             physicalNetwork.addDeviceTo(id, HostType.EDGE)
         }
 
-        sampler = Sampler(physicalNetwork, timer, DoubleTime(15.0, TimeUnit.MINUTES)).also {
-            it.start() }
+        var contexts: List<SensorExecutionContext> = loraNodes.map { it.getContext() }
+        contexts += otherNodes.map { it.getContext() }
+
+         sampler = Sampler(physicalNetwork, contexts, timer, DoubleTime(15.0, TimeUnit.MINUTES)).also { it.start() }
     }
 
     private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
@@ -176,7 +178,7 @@ class Acsos(
             """.trimIndent()
                 .plus("\n")
                 .plus(
-                    sampler.getSamplings()
+                    sampler.getSamplings().asSequence()
                         .map { it.print(timeUnit) }
                         .reduce { s1, s2 -> s1 + "\n" + s2 }
                 )

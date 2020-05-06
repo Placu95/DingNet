@@ -53,4 +53,6 @@ class BuildingNodeWrapper(
     init {
         timer.addPeriodicTrigger(startingTime, sleepTime) { runVM() }
     }
+
+    fun getContext(): BuildingECForDingNet = executionContext as BuildingECForDingNet
 }
