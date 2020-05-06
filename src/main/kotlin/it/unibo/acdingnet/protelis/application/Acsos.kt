@@ -8,6 +8,7 @@ import iot.networkentity.Mote
 import iot.networkentity.UserMote
 import it.unibo.acdingnet.protelis.dingnetwrapper.BuildingNodeWrapper
 import it.unibo.acdingnet.protelis.dingnetwrapper.SensorNodeWrapper
+import it.unibo.acdingnet.protelis.executioncontext.SensorExecutionContext
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.model.SensorType
 import it.unibo.acdingnet.protelis.mqtt.MqttBrokerMockSerWithDelay
@@ -16,7 +17,6 @@ import it.unibo.acdingnet.protelis.mqtt.MqttMockCastWithDelay
 import it.unibo.acdingnet.protelis.mqtt.MqttMockSerWithDelay
 import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
 import it.unibo.acdingnet.protelis.neighborhood.Node
-import it.unibo.acdingnet.protelis.node.GenericNode
 import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
@@ -61,7 +61,7 @@ class Acsos(
         // creates node for neighborhood manager
         val nodes: MutableSet<Node> = motes.map {
             Node(
-                StringUID("lora_${it.eui}"),
+                StringUID("${it.eui}"),
                 LatLongPosition(
                     it.pathPosition.latitude,
                     it.pathPosition.longitude
@@ -97,7 +97,7 @@ class Acsos(
         loraNodes = motes
             .filter { it !is UserMote }
             .map {
-                val id = StringUID("lora_${it.eui}")
+                val id = StringUID("${it.eui}")
                 SensorNodeWrapper(
                     ProtelisLoader.parse(protelisProgram),
                     DoubleTime(random.nextInt(100).toDouble()),
