@@ -64,6 +64,15 @@ abstract public class RangeDataGenerator implements SensorDataGenerator {
         samplesTime = config.get(sensorConfig.samplesTime);
         finalTime = config.get(sensorConfig.finalTime);
         map = config.get(sensorConfig.cells).stream().collect(Collectors.groupingBy(Cell::getCellNumber));
+        if (map.containsKey(-1)) {
+            var cellsValidForAll = map.remove(-1);
+//            map.values().forEach(cells -> cells.addAll(cellsValidForAll));
+            IntStream.rangeClosed(1, row * columns).boxed().forEach(index -> {
+                var newCells = map.getOrDefault(index, new LinkedList<>());
+                newCells.addAll(cellsValidForAll);
+                map.put(index, newCells);
+            });
+        }
         map.forEach((e, v) -> v.sort((c1, c2) -> Double.compare(c2.getFromTime(), c1.getFromTime())));
         function = initFunction();
     }
@@ -88,7 +97,7 @@ abstract public class RangeDataGenerator implements SensorDataGenerator {
         for (int x = 0; x < xval.length; x++) {
             for (int y = 0; y < yval.length; y++) {
                 for (int z = 0; z < zval.length; z++) {
-                    var level = getCellLevel(xval[x], yval[y], DoubleTime.zero().plusSeconds(timeUnit.convertTo(zval[z], TimeUnit.SECONDS)));
+                    var level = getCellLevel(xval[x], yval[y], new DoubleTime(zval[z], timeUnit));
                     fval[x][y][z] = level.getLowerBound() + (level.getUpperBound() - level.getLowerBound()) * random.nextDouble();
                 }
             }
