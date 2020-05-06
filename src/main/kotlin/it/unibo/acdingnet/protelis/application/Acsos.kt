@@ -152,7 +152,7 @@ class Acsos(
         var contexts: List<SensorExecutionContext> = loraNodes.map { it.getContext() }
         contexts += otherNodes.map { it.getContext() }
 
-         sampler = Sampler(physicalNetwork, contexts, timer, DoubleTime(15.0, TimeUnit.MINUTES)).also { it.start() }
+        sampler = Sampler(physicalNetwork, contexts, timer, DoubleTime(15.0, TimeUnit.MINUTES)).also { it.start() }
     }
 
     private fun getNewClientSer(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
