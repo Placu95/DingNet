@@ -126,7 +126,8 @@ class Acsos(
                 Utils.roundToDecimal(random.nextDouble(Const.MIN_TEMP, Const.MAX_TEMP)),
                 0.1,
                 timer,
-                neigh.getNeighborhoodByNodeId(it.uid).map { n -> n.uid }.toSet()
+                neigh.getNeighborhoodByNodeId(it.uid).map { n -> n.uid }.toSet(),
+                physicalNetwork = physicalNetwork
             )
         }
 
