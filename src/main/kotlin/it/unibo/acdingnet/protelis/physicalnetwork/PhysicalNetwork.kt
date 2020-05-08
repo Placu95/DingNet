@@ -57,7 +57,7 @@ class PhysicalNetwork(configuration: Configuration) {
     fun computeDelayPhysicalSmartphoneToProtelisNode(deviceUID: DeviceUID): Time {
         val delay = when (getHostByDevice(deviceUID).type) {
             HostType.SMARTPHONE -> configurationNetwork.dLocalhost
-            HostType.CLOUD -> configurationNetwork.dsCnd
+            HostType.CLOUD -> configurationNetwork.dsCnd + configurationNetwork.dec
             else -> throw IllegalStateException()
         }
         // type is irrelevant
