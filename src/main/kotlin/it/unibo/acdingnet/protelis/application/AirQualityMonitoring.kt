@@ -33,7 +33,7 @@ import java.util.*
 class AirQualityMonitoring(
     motes: List<Mote>,
     timer: GlobalClock,
-    protelisProgram: String = "protelis:homeHeating_timer"
+    protelisProgram: String = "/protelis/homeHeating_timer.pt"
 ) : ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
     private val neigh: NeighborhoodManager
