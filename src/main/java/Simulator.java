@@ -67,8 +67,9 @@ public class Simulator {
             simulationRunner.setInputProfiles(cmd.getOptionValue("inputProfileFile"));
         }
 
+        networkConfigFilePath = cmd.getOptionValue("networkConfigFile");
+
         if (cmd.hasOption("configurationFile")) {
-            networkConfigFilePath = cmd.getOptionValue("networkConfigFile");
             var file = new File(cmd.getOptionValue("configurationFile"));
             simulationRunner.loadConfigurationFromFile(file);
             simulationRunner.getSimulation().setInputProfile(simulationRunner.getInputProfiles().get(0));
