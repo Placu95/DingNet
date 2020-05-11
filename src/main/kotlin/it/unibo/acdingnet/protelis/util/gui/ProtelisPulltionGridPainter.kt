@@ -12,6 +12,7 @@ class ProtelisPulltionGridPainter(pollutionGrid: PollutionGrid) :
         airQuality >= 75 -> Color.decode("#f29305")
         airQuality >= 50 -> Color.decode("#eec20b")
         airQuality >= 25 -> Color.decode("#c0e010")
-        else -> Color.decode("#4edc2e")
+        airQuality > 0 -> Color.decode("#4edc2e")
+        else -> Color.decode("#D3D3D3")
     }
 }

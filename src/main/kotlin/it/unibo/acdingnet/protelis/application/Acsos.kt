@@ -212,7 +212,6 @@ class Acsos(
         loraNodes.map { Triple(it.deviceUID, it.position.toGeoPosition(), it.getPollutionValue()) },
         otherNodes.map { it.position.toGeoPosition() },
         Const.NEIGHBORHOOD_RANGE,
-        // I take the node "6" because is not in the raining region, so its value correspond to the global value
-        loraNodes.find { it.deviceUID == StringUID("-6") }?.getPollutionValue() ?: Const.DEFAULT_IAQ_LEVEL
+        -1.0
     )
 }
