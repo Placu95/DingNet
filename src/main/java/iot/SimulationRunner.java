@@ -222,28 +222,30 @@ public class SimulationRunner {
 
     /**
      * Simulate a whole run, until the simulation is finished.
-     * @param updateFrequency The frequency of callback updates to the {@code listener} (expressed in once every x simulation steps).
+     * @param updateRate The frequency of callback updates to the {@code listener} (expressed in once every x simulation steps).
      * @param listener The listener which receives the callbacks every x simulation steps.
      */
-    public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener) {
-        simulate(updateFrequency, listener, true);
+    public void simulate(MutableInteger updateRate, SimulationUpdateListener listener) {
+        simulate(updateRate, listener, true);
     }
 
-    public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener, boolean withGUI) {
+    public void simulate(MutableInteger updateRate, SimulationUpdateListener listener, boolean withGUI) {
         if (withGUI) {
-            new Thread(() -> doSimulation(updateFrequency, listener)).start();
+            new Thread(() -> doSimulation(updateRate, 100, listener)).start();
         } else {
-            doSimulation(updateFrequency, listener);
+            doSimulation(updateRate, 1000, listener);
         }
     }
 
-    private void doSimulation(MutableInteger updateFrequency, SimulationUpdateListener listener) {
+    private void doSimulation(MutableInteger updateRate, int rateMultiplier, SimulationUpdateListener listener) {
         long simulationStep = 0;
         while (!this.isSimulationFinished()) {
             this.simulation.simulateStep();
-
-            // Visualize every x seconds
-            if (simulationStep++ % (updateFrequency.intValue() * 1000) == 0) {
+            /*
+                Now each step corresponds to 500ms, so with an update rate of 10 (the actual minimum value)
+                and a rate multiplier of 100 (simulation with GUI), the GUI is updated every 10 * 100 * 500 = 500000 ms = 500 s
+            */
+            if (simulationStep++ % (updateRate.intValue() * rateMultiplier) == 0) {
                 listener.update();
             }
         }
