@@ -37,7 +37,7 @@ abstract class LoRaMoteExecutionContext(
         consumer: (topic: String, message: T) -> Unit
     ) = mqttClient.subscribe(this, topic, type, consumer)
 
-    protected fun handleDeviceTransmission(message: LoRaTransmission) {
+    protected open fun handleDeviceTransmission(message: LoRaTransmission) {
         val payload = message.content.payload.toMutableList()
         if (payload.isNotEmpty() &&
             payload[0] == MessageType.SENSOR_VALUE.code ||

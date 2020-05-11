@@ -163,7 +163,7 @@ public class Simulation {
                 mote.getPath().getNextPoint(mote.getPathPositionIndex()).ifPresent(dst ->
                     this.getEnvironment().moveMote(mote, dst));
             });
-        this.getEnvironment().getClock().tick(1);
+        this.getEnvironment().getClock().tick(500);
     }
 
 

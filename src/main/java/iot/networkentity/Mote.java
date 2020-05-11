@@ -226,6 +226,9 @@ public class Mote extends NetworkEntity {
                 var actualPoint = getEnvironment().getMapHelper().toGeoPosition(getPosInt());
                 if (MapHelper.equalsGeoPosition(actualPoint, p)) {
                     pathPositionIndex++;
+                    if (pathPositionIndex == getPath().getWayPoints().size() - 1) {
+                        isArrived = true;
+                    }
                 }
             });
     }
@@ -386,7 +389,6 @@ public class Mote extends NetworkEntity {
         this.startMovementOffset = offset;
     }
 
-
     /**
      *
      * @return time to await before send the first packet (in seconds)
@@ -420,14 +422,6 @@ public class Mote extends NetworkEntity {
     }
 
     public boolean isArrivedToDestination() {
-        if (path.isEmpty() || isArrived) {
-            return true;
-        }
-        //noinspection OptionalGetWithoutIsPresent(if the path is not empty the destination is present)
-        if (this.getEnvironment().getMapHelper()
-            .toMapCoordinate(path.getDestination().get()).equals(getPosInt())) {
-            isArrived = true;
-        }
-        return isArrived;
+        return path.isEmpty() || isArrived;
     }
 }

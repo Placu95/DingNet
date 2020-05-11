@@ -11,7 +11,8 @@ import iot.mqtt.MQTTClientFactory;
 import iot.networkentity.Gateway;
 import iot.networkentity.Mote;
 import iot.networkentity.NetworkServer;
-import it.unibo.acdingnet.protelis.ProtelisApp;
+import it.unibo.acdingnet.protelis.application.ProtelisApplication;
+import it.unibo.acdingnet.protelis.application.ProtelisApplicationFactory;
 import org.jetbrains.annotations.NotNull;
 import selfadaptation.adaptationgoals.IntervalAdaptationGoal;
 import selfadaptation.adaptationgoals.ThresholdAdaptationGoal;
@@ -45,7 +46,7 @@ public class SimulationRunner {
     private List<MoteProbe> moteProbe;
     private PollutionGrid pollutionGrid;
 
-    private ProtelisApp protelisApp;
+    private ProtelisApplication protelisApplication;
     private RoutingApplication routingApplication;
     private PollutionMonitor pollutionMonitor;
     private NetworkServer networkServer;
@@ -136,8 +137,12 @@ public class SimulationRunner {
         return pollutionGrid;
     }
 
-    public ProtelisApp getProtelisApp() {
-        return protelisApp;
+    public ProtelisApplication getProtelisApplication() {
+        return protelisApplication;
+    }
+
+    public NetworkServer getNetworkServer() {
+        return this.networkServer;
     }
 
     public void setApproach(String name) {
@@ -184,7 +189,7 @@ public class SimulationRunner {
         this.pollutionGrid = null;
         this.pollutionMonitor = null;
         this.routingApplication = null;
-        protelisApp = createProtelisApp();
+        protelisApplication = createProtelisApplication();
     }
 
     /**
@@ -221,21 +226,31 @@ public class SimulationRunner {
      * @param listener The listener which receives the callbacks every x simulation steps.
      */
     public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener) {
-        new Thread(() -> {
-            long simulationStep = 0;
-            while (!this.isSimulationFinished()) {
-                this.simulation.simulateStep();
+        simulate(updateFrequency, listener, true);
+    }
 
-                // Visualize every x seconds
-                if (simulationStep++ % (updateFrequency.intValue() * 1000) == 0) {
-                    listener.update();
-                }
+    public void simulate(MutableInteger updateFrequency, SimulationUpdateListener listener, boolean withGUI) {
+        if (withGUI) {
+            new Thread(() -> doSimulation(updateFrequency, listener)).start();
+        } else {
+            doSimulation(updateFrequency, listener);
+        }
+    }
+
+    private void doSimulation(MutableInteger updateFrequency, SimulationUpdateListener listener) {
+        long simulationStep = 0;
+        while (!this.isSimulationFinished()) {
+            this.simulation.simulateStep();
+
+            // Visualize every x seconds
+            if (simulationStep++ % (updateFrequency.intValue() * 1000) == 0) {
+                listener.update();
             }
+        }
 
-            // Restore the initial positions after the run
-            listener.update();
-            listener.onEnd();
-        }).start();
+        // Restore the initial positions after the run
+        listener.update();
+        listener.onEnd();
     }
 
 
@@ -290,6 +305,14 @@ public class SimulationRunner {
 
     private List<InputProfile> loadInputProfiles() {
         return InputProfilesReader.readInputProfiles();
+    }
+
+    /**
+     * Load input profiles from a provided file.
+     * @param file The file path with the input profiles.
+     */
+    public void setInputProfiles(String file) {
+        inputProfiles = InputProfilesReader.readInputProfiles(file);
     }
 
     /**
@@ -353,11 +376,11 @@ public class SimulationRunner {
         );
     }
 
-    private ProtelisApp createProtelisApp() {
+    private ProtelisApplication createProtelisApplication() {
         return simulation.getInputProfile()
             .orElseThrow(() -> new IllegalStateException("input profile no selected"))
             .getProtelisProgram()
-            .map(app -> new ProtelisApp(
+            .map(app -> ProtelisApplicationFactory.INSTANCE.createApplication(
                 app,
                 getEnvironment().getMotes(),
                 getEnvironment().getClock())

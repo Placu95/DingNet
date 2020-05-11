@@ -14,7 +14,7 @@ open class MQTTNetMgrWithMQTTNeighborhoodMgr(
     mqttClient: MqttClientBasicApi,
     applicationEUI: String,
     initialPosition: LatLongPosition,
-    neighbors: Set<StringUID> = emptySet()
+    neighbors: Set<StringUID>? = null
 ) : MQTTNetworkManager(deviceUID, mqttClient, applicationEUI, emptySet()) {
 
     init {
@@ -25,7 +25,7 @@ open class MQTTNetMgrWithMQTTNeighborhoodMgr(
                 .find { it.first.uid == deviceUID }
                 ?.let { setNeighbors(it.second.map { it.uid }.toSet()) }
         }
-        if (neighbors.isEmpty()) {
+        if (neighbors == null) {
             mqttClient.publish(
                 Topics.neighborhoodManagerTopic(applicationEUI),
                 generateMessage(MessageType.ADD, deviceUID, initialPosition))

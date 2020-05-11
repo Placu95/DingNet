@@ -1,14 +1,13 @@
 package util.time;
 
-import java.util.Objects;
-
 /**
  * Immutable class, default unit of measure is milliseconds
  */
 public class DoubleTime implements Time {
 
     private static final TimeUnit DEFAULT_TIME_UNIT = TimeUnit.MILLIS;
-    private double time;
+    private static final DoubleTime ZERO = new DoubleTime(0);
+    private final double time;
     private final TimeUnit timeUnit;
 
     // region constructor
@@ -27,7 +26,7 @@ public class DoubleTime implements Time {
     // endregion
 
     static public Time zero() {
-        return new DoubleTime(0);
+        return ZERO;
     }
 
     static public Time fromSeconds(double time) {
@@ -74,6 +73,11 @@ public class DoubleTime implements Time {
         return (int)asHour() % 24;
     }
 
+    @Override
+    public Time plus(Time time) {
+        return plus(time.asMilli(), TimeUnit.MILLIS);
+    }
+
     private DoubleTime plus(double value, TimeUnit timeUnit) {
         return new DoubleTime(time + timeUnit.convertTo(value, this.timeUnit), this.timeUnit);
     }
@@ -104,6 +108,15 @@ public class DoubleTime implements Time {
     }
 
     @Override
+    public Time minus(Time time, boolean onlyPositive) {
+        var value = this.time - TimeUnit.MILLIS.convertTo(time.asMilli(), this.timeUnit);
+        if (value < 0 && onlyPositive) {
+            throw new IllegalStateException("after the subtraction the time is negative");
+        }
+        return new DoubleTime(value, this.timeUnit);
+    }
+
+    @Override
     public boolean isAfter(Time other) {
         return asMilli() > other.asMilli();
     }
@@ -118,13 +131,12 @@ public class DoubleTime implements Time {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         DoubleTime that = (DoubleTime) o;
-        return Double.compare(that.time, time) == 0 &&
-            timeUnit == that.timeUnit;
+        return asMilli() == that.asMilli();
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(time, timeUnit);
+        return Double.hashCode(time) ^ timeUnit.hashCode();
     }
 
     @Override

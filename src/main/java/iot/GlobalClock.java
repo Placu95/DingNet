@@ -62,7 +62,7 @@ public class GlobalClock {
 
     public long addTrigger(Time time, Supplier<Time> trigger) {
         var trig = new Trigger(trigger);
-        addTrigger(TimeHelper.roundToMilli(time), trig);
+        addTrigger(TimeHelper.ceilToMilli(time), trig);
         return trig.getUid();
     }
 
@@ -81,9 +81,20 @@ public class GlobalClock {
      * @return the trigger id
      */
     public long addPeriodicTrigger(Time startingTime, long period, Runnable trigger) {
+        return addPeriodicTrigger(startingTime, DoubleTime.fromSeconds(period), trigger);
+    }
+
+    /**
+     *
+     * @param startingTime time when the trigger is fired for the first time
+     * @param period the period of the trigger
+     * @param trigger the trigger
+     * @return the trigger id
+     */
+    public long addPeriodicTrigger(Time startingTime, Time period, Runnable trigger) {
         return addTrigger(startingTime, () -> {
             trigger.run();
-            return getTime().plusSeconds(period);
+            return getTime().plus(period);
         });
     }
 
@@ -103,6 +114,11 @@ public class GlobalClock {
             }
         }
         return false;
+    }
+
+    public boolean removeTrigger(Time fromTime, long triggerId) {
+        return triggers.get(TimeHelper.ceilToMilli(fromTime))
+            .removeIf(p -> p.getUid() == triggerId);
     }
 
     private void fireTrigger() {

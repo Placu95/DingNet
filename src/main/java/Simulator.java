@@ -10,6 +10,7 @@ import util.time.Time;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.Optional;
 
 /**
  * Simulator starter class.
@@ -19,13 +20,32 @@ import java.nio.charset.StandardCharsets;
  */
 public class Simulator {
 
+    // FIXME I don't like it here, it require a better solution
+    private static String networkConfigFilePath = null;
+    public static Optional<String> getNetworkConfigFilePath() {
+        return Optional.ofNullable(networkConfigFilePath);
+    }
+
     public static void main(String[] args) {
 
         Options options = new Options();
 
-        Option inputFile = new Option("i", "inputFile", true, "path of configuration file");
-        inputFile.setRequired(false);
-        options.addOption(inputFile);
+        Option configFile =
+            new Option("cf", "configurationFile", true, "path of the configuration file");
+        configFile.setRequired(false);
+        options.addOption(configFile);
+        Option inputProfileFile =
+            new Option("ipf", "inputProfileFile", true, "path of the input profiles file");
+        inputProfileFile.setRequired(false);
+        options.addOption(inputProfileFile);
+        Option outputFile =
+            new Option("of", "outputFile", true, "path of the output file");
+        outputFile.setRequired(false);
+        options.addOption(outputFile);
+        Option networkConfigFile =
+            new Option("nf", "networkConfigFile", true, "path of the network config file");
+        networkConfigFile.setRequired(false);
+        options.addOption(networkConfigFile);
 
         CommandLine cmd = null;
 
@@ -43,13 +63,22 @@ public class Simulator {
         // resource directory to the the directory in the user directory
         copyResourceDirectory(settingsReader.getConfigurationsResources(), settingsReader.getConfigurationsDirectory());
 
-        if (cmd.hasOption("inputFile")) {
-            var file = new File(cmd.getOptionValue("inputFile"));
+        if (cmd.hasOption("inputProfileFile")) {
+            simulationRunner.setInputProfiles(cmd.getOptionValue("inputProfileFile"));
+        }
+
+        if (cmd.hasOption("configurationFile")) {
+            networkConfigFilePath = cmd.getOptionValue("networkConfigFile");
+            var file = new File(cmd.getOptionValue("configurationFile"));
             simulationRunner.loadConfigurationFromFile(file);
             simulationRunner.getSimulation().setInputProfile(simulationRunner.getInputProfiles().get(0));
             simulationRunner.setupTimedRun();
             var sec = new MutableInteger(5);
-            simulationRunner.simulate(sec, new BatchSimulationUpdater(sec));
+            simulationRunner.simulate(
+                sec,
+                new BatchSimulationUpdater(sec, cmd.getOptionValue("outputFile")),
+                false
+            );
         } else {
             MainGUI.startGUI(simulationRunner);
         }
@@ -61,10 +90,16 @@ public class Simulator {
     private static class BatchSimulationUpdater implements SimulationUpdateListener {
 
         private final MutableInteger rate;
-        private Time time;
+        private final String outputFile;
+        private final Time time;
 
         public BatchSimulationUpdater(MutableInteger rate) {
+            this(rate, null);
+        }
+
+        public BatchSimulationUpdater(MutableInteger rate, String outputFile) {
             this.rate = rate;
+            this.outputFile = outputFile;
             time = DoubleTime.zero();
         }
 
@@ -75,7 +110,12 @@ public class Simulator {
 
         @Override
         public void onEnd() {
-
+            if (outputFile != null) {
+                SimulationRunner
+                    .getInstance()
+                    .getProtelisApplication()
+                    .storeSimulationResults(outputFile);
+            }
         }
     }
 

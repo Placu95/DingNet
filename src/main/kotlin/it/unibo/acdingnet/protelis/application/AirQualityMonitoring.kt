@@ -1,9 +1,9 @@
-package it.unibo.acdingnet.protelis
+package it.unibo.acdingnet.protelis.application
 
-import application.Application
 import application.pollution.PollutionGrid
+import gui.mapviewer.TextPainter
+import gui.mapviewer.WayPointPainter
 import iot.GlobalClock
-import iot.mqtt.MQTTClientFactory
 import iot.mqtt.TransmissionWrapper
 import iot.networkentity.Mote
 import iot.networkentity.UserMote
@@ -15,20 +15,26 @@ import it.unibo.acdingnet.protelis.neighborhood.NeighborhoodManager
 import it.unibo.acdingnet.protelis.neighborhood.Node
 import it.unibo.acdingnet.protelis.node.BuildingNode
 import it.unibo.acdingnet.protelis.util.Const
+import it.unibo.acdingnet.protelis.util.MqttClientHelper
 import it.unibo.acdingnet.protelis.util.gui.ProtelisPollutionGrid
+import it.unibo.acdingnet.protelis.util.gui.ProtelisPulltionGridPainter
 import it.unibo.acdingnet.protelis.util.toGeoPosition
-import it.unibo.mqttclientwrapper.mock.cast.MqttMockCast
-import org.jxmapviewer.viewer.GeoPosition
+import it.unibo.mqttclientwrapper.mock.serialization.MqttMockSer
+import org.jxmapviewer.JXMapViewer
+import org.jxmapviewer.painter.Painter
+import org.jxmapviewer.viewer.DefaultWaypoint
+import org.jxmapviewer.viewer.Waypoint
 import org.protelis.lang.ProtelisLoader
 import org.protelis.lang.datatype.impl.StringUID
 import util.time.DoubleTime
+import java.awt.Color
 import java.util.*
 
-class ProtelisApp(
-    protelisProgram: String,
+class AirQualityMonitoring(
     motes: List<Mote>,
-    private val timer: GlobalClock
-) : Application(emptyList()) {
+    timer: GlobalClock,
+    protelisProgram: String = "/protelis/homeHeating_timer.pt"
+) : ProtelisApplication(motes, timer, protelisProgram, emptyList()) {
 
     private val neigh: NeighborhoodManager
     private val random = Random(2)
@@ -74,7 +80,7 @@ class ProtelisApp(
 
         neigh = NeighborhoodManager(
             Const.APPLICATION_ID,
-            MQTTClientFactory.getSingletonInstance(), Const.NEIGHBORHOOD_RANGE, nodes
+            MqttMockSer(), Const.NEIGHBORHOOD_RANGE, nodes
         )
 
         sensorNodes = motes
@@ -82,13 +88,13 @@ class ProtelisApp(
             .map {
                 val id = StringUID("" + it.eui)
                 SensorNodeWrapper(
-                    ProtelisLoader.parse(protelisProgram),
+                    ProtelisLoader.parse(protelisProgramResource),
                     DoubleTime(random.nextInt(100).toDouble()),
                     900,
                     id,
                     Const.APPLICATION_ID,
-                    MqttMockCast(),
-                    MQTTClientFactory.getSingletonInstance(),
+                    MqttMockSer(),
+                    MqttClientHelper.addLoRaWANAdapters(MqttMockSer()),
                     LatLongPosition(
                         it.pathPosition.latitude,
                         it.pathPosition.longitude
@@ -101,12 +107,12 @@ class ProtelisApp(
 
         building = buildingNode.map {
             BuildingNodeWrapper(
-                ProtelisLoader.parse(protelisProgram),
+                ProtelisLoader.parse(protelisProgramResource),
                 DoubleTime(random.nextInt(100).toDouble()).plusMinutes(1.0),
                 900,
                 it.first.uid,
                 Const.APPLICATION_ID,
-                MqttMockCast(),
+                MqttMockSer(),
                 it.first.position,
                 it.second,
                 0.1,
@@ -116,27 +122,29 @@ class ProtelisApp(
         }
     }
 
-    override fun consumePackets(topicFilter: String, message: TransmissionWrapper) {}
-
-    fun getDrawableNode(): List<DrawableNodeInfo> = building.map {
-        DrawableNodeInfo(
-            it.position.toGeoPosition(),
-            it.getTemp(Const.ProtelisEnv.DESIRED_TEMP),
-            it.getTemp(Const.ProtelisEnv.MAX_TEMP),
-            it.getTemp(Const.ProtelisEnv.CURRENT_TEMP)
+    override fun getPainters(): List<Painter<JXMapViewer>> {
+        val gridPainter = ProtelisPulltionGridPainter(getPollutionGrid())
+        val buildingPainter = WayPointPainter<Waypoint>(Color.BLACK, 10)
+            .setWaypoints(building
+                .map { it.position.toGeoPosition() }
+                .map { DefaultWaypoint(it) }
+                .toSet()
         )
+        val tempPainter = TextPainter<Waypoint>(TextPainter.Type.WAYPOINT).setWaypoints(
+            building.map { DefaultWaypoint(it.position.toGeoPosition()) to "" +
+                "${it.getTemp(Const.ProtelisEnv.CURRENT_TEMP)}\u00ba/" +
+                "${it.getTemp(Const.ProtelisEnv.DESIRED_TEMP)}\u00ba/" +
+                "${it.getTemp(Const.ProtelisEnv.MAX_TEMP)}\u00ba" }
+                .toMap()
+        )
+        return listOf(gridPainter, buildingPainter, tempPainter)
     }
 
-    fun getPollutionGrid(): PollutionGrid = ProtelisPollutionGrid(
+    override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) { }
+
+    private fun getPollutionGrid(): PollutionGrid = ProtelisPollutionGrid(
         sensorNodes.map { Pair(it.position.toGeoPosition(), it.getPollutionValue()) },
         Const.NEIGHBORHOOD_RANGE,
         20.0 // value in good level
     )
 }
-
-data class DrawableNodeInfo(
-    val position: GeoPosition,
-    val desiredTemp: Double,
-    val maxTemp: Double,
-    val currentTemp: Double
-)

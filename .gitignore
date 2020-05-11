@@ -323,5 +323,12 @@ buildNumber.properties
 
 .idea/vcs.xml
 .cache
+data/*
+.temp/*
 moquette*.log
 .kotlintest/*
+
+# charts
+charts/*
+data_summary_*
+timeprocessed

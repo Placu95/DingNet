@@ -19,7 +19,7 @@ env:
         - GRAVIS="https://raw.githubusercontent.com/DanySK/Gravis-CI/master/"
     jobs:
         - *reference_jdk
-        - JDK="adopt@1.12"
+        - JDK="adopt@1.14"
 jobs:
     include:
         - stage: check

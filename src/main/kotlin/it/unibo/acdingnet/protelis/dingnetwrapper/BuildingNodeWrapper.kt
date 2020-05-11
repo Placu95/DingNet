@@ -3,6 +3,8 @@ package it.unibo.acdingnet.protelis.dingnetwrapper
 import iot.GlobalClock
 import it.unibo.acdingnet.protelis.model.LatLongPosition
 import it.unibo.acdingnet.protelis.node.BuildingNode
+import it.unibo.acdingnet.protelis.physicalnetwork.Host
+import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
 import org.protelis.lang.datatype.impl.StringUID
 import org.protelis.vm.ExecutionContext
@@ -20,7 +22,9 @@ class BuildingNodeWrapper(
     desiredTemp: Double,
     deltaTemp: Double,
     val timer: GlobalClock,
-    neighbors: Set<StringUID>
+    neighbors: Set<StringUID>,
+    host: Host? = null,
+    private val physicalNetwork: PhysicalNetwork? = null
 ) : BuildingNode(
     protelisProgram,
     sleepTime,
@@ -30,6 +34,7 @@ class BuildingNodeWrapper(
     position,
     desiredTemp,
     deltaTemp,
+    host,
     neighbors
 ) {
 
@@ -40,11 +45,14 @@ class BuildingNodeWrapper(
             deltaTemp,
             applicationUID,
             execContextMqttClient,
-            networkManager
+            networkManager,
+            physicalNetwork
         )
     }
 
     init {
         timer.addPeriodicTrigger(startingTime, sleepTime) { runVM() }
     }
+
+    fun getContext(): BuildingECForDingNet = executionContext as BuildingECForDingNet
 }

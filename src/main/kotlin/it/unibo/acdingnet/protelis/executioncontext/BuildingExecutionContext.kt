@@ -29,4 +29,8 @@ open class BuildingExecutionContext(
 
     fun getDecreaseDelta() = deltaTemp
     fun getIncreaseDelta() = deltaTemp
+
+    open fun setCurrentTemp(temp: Double) {
+        execEnvironment.put(CURRENT_TEMP, temp)
+    }
 }

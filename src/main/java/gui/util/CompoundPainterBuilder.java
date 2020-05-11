@@ -6,9 +6,7 @@ import gui.mapviewer.*;
 import iot.Environment;
 import iot.SimulationRunner;
 import iot.networkentity.UserMote;
-import it.unibo.acdingnet.protelis.DrawableNodeInfo;
-import it.unibo.acdingnet.protelis.ProtelisApp;
-import it.unibo.acdingnet.protelis.util.gui.ProtelisPulltionGridPainter;
+import it.unibo.acdingnet.protelis.application.ProtelisApplication;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.painter.CompoundPainter;
 import org.jxmapviewer.painter.Painter;
@@ -144,26 +142,10 @@ public class CompoundPainterBuilder {
         return this;
     }
 
-    public CompoundPainterBuilder withProtelisApp(ProtelisApp protelisApp) {
+    public CompoundPainterBuilder withProtelisApp(ProtelisApplication protelisApp) {
         if (protelisApp != null) {
-            painters.add(new ProtelisPulltionGridPainter(protelisApp.getPollutionGrid()));
-            var points = protelisApp.getDrawableNode();
-            var painter = new WayPointPainter<>(Color.BLACK, 10)
-                .setWaypoints(points
-                    .stream()
-                    .map(DrawableNodeInfo::getPosition)
-                    .map(DefaultWaypoint::new)
-                    .collect(Collectors.toSet())
-                );
-            painters.add(painter);
-            var paintNumber = new TextPainter<>(TextPainter.Type.WAYPOINT)
-                .setWaypoints(points.stream()
-                    .collect(Collectors.toMap(w ->
-                        new DefaultWaypoint(w.getPosition()),
-                        it -> it.getCurrentTemp() + "\u00ba/" + it.getDesiredTemp() + "\u00ba/" + it.getMaxTemp() + "\u00ba")));
-            painters.add(paintNumber);
+            painters.addAll(protelisApp.getPainters());
         }
-
         return this;
     }
 

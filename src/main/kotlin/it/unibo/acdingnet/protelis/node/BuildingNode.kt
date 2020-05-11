@@ -2,6 +2,7 @@ package it.unibo.acdingnet.protelis.node
 
 import it.unibo.acdingnet.protelis.executioncontext.BuildingExecutionContext
 import it.unibo.acdingnet.protelis.model.LatLongPosition
+import it.unibo.acdingnet.protelis.physicalnetwork.Host
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
 import org.protelis.lang.datatype.impl.StringUID
 import org.protelis.vm.ExecutionContext
@@ -16,9 +17,10 @@ open class BuildingNode(
     position: LatLongPosition,
     protected val desiredTemp: Double,
     protected val deltaTemp: Double,
-    neighbors: Set<StringUID> = emptySet()
+    host: Host? = null,
+    neighbors: Set<StringUID>? = null
 ) : SensorNode(protelisProgram, sleepTime, deviceUID, applicationUID,
-    netManagerMqttClient, netManagerMqttClient, position, emptyList(), neighbors) {
+    netManagerMqttClient, netManagerMqttClient, position, emptyList(), host, neighbors) {
 
     override fun createContext(): ExecutionContext =
         BuildingExecutionContext(

@@ -1,8 +1,10 @@
-package it.unibo.acdingnet.protelis.executioncontext
+ package it.unibo.acdingnet.protelis.executioncontext
 
 import it.unibo.acdingnet.protelis.model.SensorType
 import it.unibo.acdingnet.protelis.node.SensorNode
 import it.unibo.acdingnet.protelis.util.Const
+import it.unibo.acdingnet.protelis.util.Const.MAX_TEMP
+import it.unibo.acdingnet.protelis.util.Const.MIN_TEMP
 import it.unibo.acdingnet.protelis.util.Interpolator
 import it.unibo.acdingnet.protelis.util.toLatLongPosition
 import it.unibo.mqttclientwrapper.api.MqttClientBasicApi
@@ -23,6 +25,8 @@ open class SensorExecutionContext @JvmOverloads constructor(
     randomSeed, execEnvironment) {
 
     override fun instance(): SensorExecutionContext = this
+    var maxTemperatureAllowed: Double = (MAX_TEMP + MIN_TEMP) / 2
+    private set
 
     override fun manageSensorValues(sensorsValue: Map<SensorType, Double>) {
         sensorsValue
@@ -44,10 +48,13 @@ open class SensorExecutionContext @JvmOverloads constructor(
         return coordinates.toLatLongPosition().distanceTo(position.toLatLongPosition())
     }
 
-    fun temperatureByPollution(pollutionValue: Double): Double = when {
-        pollutionValue < 1 -> 25.0
-        pollutionValue > 100 -> 17.0
-        else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
+    fun temperatureByPollution(pollutionValue: Double): Double {
+        maxTemperatureAllowed = when {
+            pollutionValue < 1 -> (MAX_TEMP + MIN_TEMP) / 2
+            pollutionValue > 100 -> MIN_TEMP
+            else -> roundToDecimal(Interpolator.interpolateTempByPollution(pollutionValue))
+        }
+        return maxTemperatureAllowed
     }
     //endregion
 }

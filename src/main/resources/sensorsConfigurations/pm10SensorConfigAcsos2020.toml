@@ -1,0 +1,45 @@
+[sensor]
+row = 10
+columns = 10
+defaultLevel = "VERY_LOW"
+timeUnit = "MINUTES"
+samplesTime = 1440
+finalTime = 5760
+
+# at the begining the pullotion is "HIGH" everywhere
+[[sensor.cell]]
+    cellNumber = -1
+    level = "HIGH"
+    fromTime = 0
+# then it starts rainig in the north
+[[sensor.cell]]
+    cellNumber = 35
+    level = "LOW"
+    fromTime = 1500
+[[sensor.cell]]
+    cellNumber = 47
+    level = "LOW"
+    fromTime = 1500
+[[sensor.cell]]
+    cellNumber = 33
+    level = "LOW"
+    fromTime = 1500
+[[sensor.cell]]
+    cellNumber = 55
+    level = "LOW"
+    fromTime = 1500
+# then the pullotion is "VERY_LOW" everywhere
+[[sensor.cell]]
+    cellNumber = -1
+    level = "LOW"
+    fromTime = 1860
+# the pullotion increase, now it is "MEDIUM" everywhere
+[[sensor.cell]]
+    cellNumber = -1
+    level = "MEDIUM"
+    fromTime = 3660
+# finally, the pullotion is "HIGH" everywhere again
+[[sensor.cell]]
+    cellNumber = -1
+    level = "HIGH"
+    fromTime = 4380
