@@ -1,6 +1,8 @@
 package it.unibo.acdingnet.protelis.application
 
 import Simulator
+import application.pollution.PollutionGrid
+import gui.mapviewer.WayPointPainter
 import iot.GlobalClock
 import iot.SimulationRunner
 import iot.mqtt.TransmissionWrapper
@@ -21,12 +23,17 @@ import it.unibo.acdingnet.protelis.physicalnetwork.HostType
 import it.unibo.acdingnet.protelis.physicalnetwork.PhysicalNetwork
 import it.unibo.acdingnet.protelis.physicalnetwork.configuration.Configuration
 import it.unibo.acdingnet.protelis.util.*
+import it.unibo.acdingnet.protelis.util.gui.ProtelisPollutionGridDoubleLevel
+import it.unibo.acdingnet.protelis.util.gui.ProtelisPulltionGridPainter
 import org.jxmapviewer.JXMapViewer
 import org.jxmapviewer.painter.Painter
+import org.jxmapviewer.viewer.DefaultWaypoint
+import org.jxmapviewer.viewer.Waypoint
 import org.protelis.lang.ProtelisLoader
 import org.protelis.lang.datatype.impl.StringUID
 import util.time.DoubleTime
 import util.time.TimeUnit
+import java.awt.Color
 import java.io.File
 import java.util.*
 
@@ -162,7 +169,7 @@ class Acsos(
     private fun getNewClientCast(id: StringUID) = MqttClientHelper.addLoRaWANAdapters(
         MqttMockCastWithDelay(id, brokerCast))
 
-    override fun getPainters(): List<Painter<JXMapViewer>> = emptyList()
+    // override fun getPainters(): List<Painter<JXMapViewer>> = emptyList()
 
     override fun consumePackets(topicFilter: String?, message: TransmissionWrapper?) {}
 
@@ -189,4 +196,23 @@ class Acsos(
         val file = File(pathDir, fileName)
         file.printWriter().use { it.println(output) }
     }
+
+    override fun getPainters(): List<Painter<JXMapViewer>> {
+        val gridPainter = ProtelisPulltionGridPainter(getPollutionGrid())
+        val buildingPainter = WayPointPainter<Waypoint>(Color.BLACK, 10)
+            .setWaypoints(otherNodes
+                .map { it.position.toGeoPosition() }
+                .map { DefaultWaypoint(it) }
+                .toSet()
+            )
+        return listOf(gridPainter, buildingPainter)
+    }
+
+    private fun getPollutionGrid(): PollutionGrid = ProtelisPollutionGridDoubleLevel(
+        loraNodes.map { Triple(it.deviceUID, it.position.toGeoPosition(), it.getPollutionValue()) },
+        otherNodes.map { it.position.toGeoPosition() },
+        Const.NEIGHBORHOOD_RANGE,
+        // I take the node "6" because is not in the raining region, so its value correspond to the global value
+        loraNodes.find { it.deviceUID == StringUID("-6") }?.getPollutionValue() ?: Const.DEFAULT_IAQ_LEVEL
+    )
 }
