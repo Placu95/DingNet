@@ -99,7 +99,7 @@ class Acsos(
             .map {
                 val id = StringUID("${it.eui}")
                 SensorNodeWrapper(
-                    ProtelisLoader.parse(protelisProgram),
+                    ProtelisLoader.parse(protelisProgramResource),
                     DoubleTime(random.nextInt(100).toDouble()),
                     900,
                     id,
@@ -116,7 +116,7 @@ class Acsos(
         // creates building nodes
         otherNodes = buildingNodes.map {
             BuildingNodeWrapper(
-                ProtelisLoader.parse(protelisProgram),
+                ProtelisLoader.parse(protelisProgramResource),
                 DoubleTime(random.nextInt(100).toDouble()).plusMinutes(1.0),
                 900,
                 it.uid,

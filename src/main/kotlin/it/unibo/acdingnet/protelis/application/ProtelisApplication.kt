@@ -9,9 +9,13 @@ import org.jxmapviewer.painter.Painter
 abstract class ProtelisApplication(
     val motes: List<Mote>,
     val timer: GlobalClock,
-    val protelisProgram: String,
+    protelisProgram: String,
     topics: List<String>
 ) : Application(topics) {
+
+    val protelisProgramResource: String = getProgram(protelisProgram)
+
+    private fun getProgram(path: String) = ProtelisApplication::class.java.getResourceAsStream(path).bufferedReader().readText()
 
     abstract fun getPainters(): List<Painter<JXMapViewer>>
 }

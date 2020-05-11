@@ -88,7 +88,7 @@ class AirQualityMonitoring(
             .map {
                 val id = StringUID("" + it.eui)
                 SensorNodeWrapper(
-                    ProtelisLoader.parse(protelisProgram),
+                    ProtelisLoader.parse(protelisProgramResource),
                     DoubleTime(random.nextInt(100).toDouble()),
                     900,
                     id,
@@ -107,7 +107,7 @@ class AirQualityMonitoring(
 
         building = buildingNode.map {
             BuildingNodeWrapper(
-                ProtelisLoader.parse(protelisProgram),
+                ProtelisLoader.parse(protelisProgramResource),
                 DoubleTime(random.nextInt(100).toDouble()).plusMinutes(1.0),
                 900,
                 it.first.uid,
