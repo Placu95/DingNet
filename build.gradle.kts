@@ -146,7 +146,7 @@ class ListOfFiles(list: List<String>) {
 val batch by tasks.register<DefaultTask>("batch") {
     val separator = System.getProperty("file.separator")
     val envFile: String = System.getProperty("user.home") +
-        "$separator.DingNet${separator}config${separator}simulation${separator}acsos2020.xml"
+        "$separator.DingNet${separator}config${separator}environment${separator}acsos2020.xml"
     val outputDir: String by project
     val outputDirFile = File(outputDir)
     if (!outputDirFile.exists() || !outputDirFile.isDirectory) {
