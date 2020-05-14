@@ -34,7 +34,8 @@ dependencies {
     implementation(Libs.gson)
     implementation(Libs.moquette_broker)
     implementation(Libs.konf)
-    implementation("org.eclipse.paho:org.eclipse.paho.client.mqttv3:1.2.0")
+    implementation(Libs.org_eclipse_paho_client_mqttv3)
+    implementation(Libs.classgraph)
     // dependencies for protelis application
     implementation(Libs.protelis)
     implementation(Libs.simplelatlng)

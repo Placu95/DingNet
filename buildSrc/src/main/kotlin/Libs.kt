@@ -29,6 +29,13 @@ object Libs {
             Versions.kotlin_scripting_compiler_embeddable
 
     /**
+     * http://www.eclipse.org/paho
+     */
+    const val org_eclipse_paho_client_mqttv3: String =
+            "org.eclipse.paho:org.eclipse.paho.client.mqttv3:" +
+            Versions.org_eclipse_paho_client_mqttv3
+
+    /**
      * http://www.github.com/kotlintest/kotlintest
      */
     const val kotlintest_runner_junit5: String = "io.kotlintest:kotlintest-runner-junit5:" +
@@ -77,6 +84,11 @@ object Libs {
      * http://commons.apache.org/proper/commons-cli/
      */
     const val commons_cli: String = "commons-cli:commons-cli:" + Versions.commons_cli
+
+    /**
+     * https://github.com/classgraph/classgraph
+     */
+    const val classgraph: String = "io.github.classgraph:classgraph:" + Versions.classgraph
 
     /**
      * http://www.jfree.org/jfreechart/

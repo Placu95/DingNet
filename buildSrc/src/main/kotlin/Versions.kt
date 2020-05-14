@@ -21,6 +21,8 @@ object Versions {
 
     const val kotlin_scripting_compiler_embeddable: String = "1.3.61" // available: "1.3.72"
 
+    const val org_eclipse_paho_client_mqttv3: String = "1.2.0" // available: "1.2.4"
+
     const val kotlintest_runner_junit5: String = "3.3.2" // available: "3.4.2"
 
     const val kotlin_stdlib_jdk8: String = "1.3.21" // available: "1.3.72"
@@ -41,13 +43,15 @@ object Versions {
 
     const val commons_cli: String = "1.4"
 
+    const val classgraph: String = "4.8.78"
+
     const val jfreechart: String = "1.5.0"
 
     const val flexjson: String = "3.3"
 
     const val forms_rt: String = "7.0.3"
 
-    const val protelis: String = "13.1.1" // available: "13.3.6"
+    const val protelis: String = "13.1.1" // available: "13.3.8"
 
     const val ktlint: String = "0.33.0" // available: "0.36.0"
 
@@ -62,11 +66,11 @@ object Versions {
     const val jpx: String = "1.4.0" // available: "2.0.0"
 
     /**
-     * Current version: "6.3"
+     * Current version: "6.4-rc-4"
      * See issue 19: How to update Gradle itself?
      * https://github.com/jmfayard/buildSrcVersions/issues/19
      */
-    const val gradleLatestVersion: String = "6.3"
+    const val gradleLatestVersion: String = "6.4"
 }
 
 /**
