@@ -135,7 +135,7 @@ public class Simulator {
             }
             try (ScanResult scanResult = new ClassGraph().whitelistPathsNonRecursive(source).scan()) {
                 scanResult.getResourcesWithExtension("xml").forEachByteArray((Resource res, byte[] content) -> {
-                    var resName = res.getPath().substring(source.length()-1);
+                    var resName = res.getPath().substring(source.length() - 1);
                     try {
                         PrintWriter writer = new PrintWriter(new File(destination, resName));
                         writer.println(new String(content, StandardCharsets.UTF_8));
