@@ -1,4 +1,7 @@
 import gui.MainGUI;
+import io.github.classgraph.ClassGraph;
+import io.github.classgraph.Resource;
+import io.github.classgraph.ScanResult;
 import iot.SimulationRunner;
 import iot.SimulationUpdateListener;
 import org.apache.commons.cli.*;
@@ -8,7 +11,9 @@ import util.SettingsReader;
 import util.time.DoubleTime;
 import util.time.Time;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
 
@@ -123,43 +128,26 @@ public class Simulator {
     // region copy resources
     // TODO improve error check and refresh file
     private static void copyResourceDirectory(@NotNull String source, @NotNull String destination) {
-        var sourceStream = Simulator.class.getResourceAsStream(source);
-        if (sourceStream == null) {
-            throw new IllegalArgumentException("directory not found: " + source);
-        }
         var dirDest = new File(destination);
         if (!dirDest.exists()) {
             if (!dirDest.mkdirs()) {
                 throw new IllegalStateException("Impossible create directory: " + dirDest.getAbsolutePath());
             }
-            try ( var reader = new BufferedReader(new InputStreamReader(sourceStream))) {
-                reader.lines()
-                    .filter(f -> f.endsWith(".xml"))
-                    .forEach(f -> copyResourceFile(source + f, destination + f));
-            } catch (IOException e) {
+            try (ScanResult scanResult = new ClassGraph().whitelistPathsNonRecursive(source).scan()) {
+                scanResult.getResourcesWithExtension("xml").forEachByteArray((Resource res, byte[] content) -> {
+                    var resName = res.getPath().substring(source.length()-1);
+                    try {
+                        PrintWriter writer = new PrintWriter(new File(destination, resName));
+                        writer.println(new String(content, StandardCharsets.UTF_8));
+                        writer.close();
+                    } catch (FileNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                });
+            } catch (Exception e) {
                 e.printStackTrace();
+                throw e;
             }
-        }
-    }
-
-    private static void copyResourceFile(@NotNull String source, @NotNull String destination) {
-        var sourceStream = MainGUI.class.getResourceAsStream(source);
-        if (sourceStream == null) {
-            throw new IllegalArgumentException("file not found: " + source);
-        }
-        try (var reader = new BufferedReader(new InputStreamReader(sourceStream, StandardCharsets.UTF_8));
-             var output = new OutputStreamWriter(new FileOutputStream(new File(destination)), StandardCharsets.UTF_8)) {
-
-            reader.lines().forEach(l -> {
-                try {
-                    output.write(l);
-                    output.write("\n");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-        } catch (IOException e) {
-            e.printStackTrace();
         }
     }
     // endregion
