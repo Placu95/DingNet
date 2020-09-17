@@ -37,7 +37,7 @@ import java.awt.Color
 import java.io.File
 import java.util.*
 
-class Acsos(
+class SmartThermostats(
     motes: List<Mote>,
     timer: GlobalClock,
     protelisProgram: String = "/protelis/homeHeating_timer_v2.pt"

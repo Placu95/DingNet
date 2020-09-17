@@ -6,7 +6,7 @@
         <simulationDuration>96</simulationDuration>
         <timeUnit>Hours</timeUnit>
         <protelisApp>
-            <protelisProgram>Acsos</protelisProgram>
+            <protelisProgram>SmartThermostats</protelisProgram>
         </protelisApp>
         <QoS>
             <adaptationGoal type="interval">
